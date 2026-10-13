@@ -1,7 +1,8 @@
 /**
- * Plan R1/R18: content pages load no JavaScript, and /app's JavaScript stays
- * small. Warns above 50 KB gzipped (the Slow 3G working target) and fails
- * above 150 KB (the hard ceiling). Run after `astro build`.
+ * Plan R1/R18: content pages load no JavaScript (apart from the tiny inline
+ * theme script, which downloads nothing), and /app's JavaScript stays small.
+ * Warns above 50 KB gzipped (the Slow 3G working target) and fails above
+ * 150 KB (the hard ceiling). Run after `astro build`.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -19,11 +20,22 @@ function htmlFiles(dir: string): string[] {
   });
 }
 
+// The one exception on content pages: BaseLayout's small inline theme script, which
+// downloads nothing and only sets light or dark before the page paints.
+const THEME_SCRIPT = /<script id="theme-init">([\s\S]*?)<\/script>/i;
+const THEME_SCRIPT_MAX_BYTES = 2048;
+
 let failed = false;
 for (const file of htmlFiles(DIST)) {
   const page = relative(DIST, file).replace(/\\/g, '/');
   const html = readFileSync(file, 'utf8');
-  const loadsScript = /<script\b/i.test(html) || /<astro-island\b/i.test(html);
+  const theme = html.match(THEME_SCRIPT);
+  if (theme && Buffer.byteLength(theme[1]) > THEME_SCRIPT_MAX_BYTES) {
+    console.error(`FAIL ${page}: the inline theme script is over ${THEME_SCRIPT_MAX_BYTES} bytes.`);
+    failed = true;
+  }
+  const rest = html.replace(THEME_SCRIPT, '');
+  const loadsScript = /<script\b/i.test(rest) || /<astro-island\b/i.test(rest);
   if (page !== 'app/index.html' && loadsScript) {
     console.error(`FAIL ${page} loads JavaScript; only /app may.`);
     failed = true;

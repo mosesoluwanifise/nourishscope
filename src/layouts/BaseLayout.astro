@@ -23,7 +23,7 @@ const fullTitle = title === SITE_NAME ? SITE_NAME : `${title} | ${SITE_NAME}`;
     <title>{fullTitle}</title>
     {/* Inline, so it runs before first paint and adds no script request. The saved choice wins,
         otherwise the device setting decides, and keeps deciding if it changes. */}
-    <script is:inline>
+    <script is:inline id="theme-init">
       (function () {
         var root = document.documentElement;
         var device = matchMedia('(prefers-color-scheme: dark)');
