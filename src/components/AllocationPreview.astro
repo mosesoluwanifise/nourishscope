@@ -5,7 +5,7 @@
  */
 import { STRATEGY_COPY } from '../lib/copy';
 import { formatCurrency, formatInt } from '../lib/format';
-import { EXAMPLE_BUDGET, examplePrepared, exampleProportional } from '../lib/worked-example';
+import { EXAMPLE_BUDGET, EXAMPLE_COUNTIES, examplePrepared, exampleProportional } from '../lib/worked-example';
 
 const rows = examplePrepared.map((c, i) => ({
   name: c.name,
@@ -13,11 +13,13 @@ const rows = examplePrepared.map((c, i) => ({
   reached: exampleProportional.rows[i].reached,
 }));
 const top = Math.max(...rows.map((r) => r.allocation));
+const places = EXAMPLE_COUNTIES.map((n) => n.replace(/ County$/, ''));
+const placesText = `${places.slice(0, -1).join(', ')} and ${places.at(-1)} counties`;
 ---
 <figure class="allocation-preview">
   <figcaption>
     <span class="allocation-preview__title">Worked example</span>
-    {formatCurrency(EXAMPLE_BUDGET)} across Magoffin, Owsley and Wolfe counties, {STRATEGY_COPY.proportional.name.toLowerCase()}
+    {formatCurrency(EXAMPLE_BUDGET)} across {placesText}, {STRATEGY_COPY.proportional.name.toLowerCase()}
   </figcaption>
   <ul>
     {rows.map((r) => (

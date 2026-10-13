@@ -129,15 +129,7 @@ th .source-label { font-weight: 400; }
 .strategy-option input { margin-top: 0.35rem; width: 1.15rem; height: 1.15rem; }
 .strategy-option__explain { display: block; color: var(--color-text-muted); font-size: 0.95rem; }
 
-/* Results switch between tables and cards by the width of the results column, not the screen:
-   beside the 22rem inputs column a wide screen can still leave the results narrow. */
-.stage--results { container-type: inline-size; }
 .distribution__cards, .nutrition__cards { list-style: none; padding: 0; display: grid; gap: var(--space-3); margin-bottom: var(--space-3); }
-.distribution__table, .nutrition__table { display: none; }
-@container (min-width: 46rem) {
-  .distribution__table, .nutrition__table { display: block; }
-  .distribution__cards, .nutrition__cards, .nutrition__total { display: none; }
-}
 .nutrition__county { display: block; font-weight: 400; font-size: 0.95rem; color: var(--color-text-muted); }
 .nutrition__lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); margin-bottom: var(--space-2); }
 .nutrition__amount { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }

@@ -40,13 +40,11 @@ export function summarise(result: StrategyResult): ResultSummary {
   };
 }
 
-const listNames = (names: string[]) => names.join(', ');
-
 /** One plain-language line for a group: "Magoffin County gets $26,427.28" or "2 communities get $0.00: A, B". */
 function groupLine(group: AllocationGroup): string {
   const amount = formatCurrency(group.amount);
   if (group.names.length === 1) return `${group.names[0]} gets ${amount}`;
-  return `${group.names.length} communities get ${amount}: ${listNames(group.names)}`;
+  return `${group.names.length} communities get ${amount}: ${group.names.join(', ')}`;
 }
 
 /**

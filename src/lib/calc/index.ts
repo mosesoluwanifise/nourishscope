@@ -5,7 +5,7 @@
  */
 export * from './types';
 export { roundHalfEven, preciseSum } from './rounding';
-export { stateMedians, healthIndex } from './health';
+export { stateMedians, healthIndex, median } from './health';
 export { prepareCommunities } from './core';
 export { allocate, DEFAULT_FLOOR_SHARE } from './allocate';
 export { runStrategy } from './results';

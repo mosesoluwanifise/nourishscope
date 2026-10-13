@@ -1,10 +1,9 @@
 /**
  * "Who gets the money": each community's allocation under all five strategies,
  * so the difference between strategies is visible community by community.
- * A table when the results column is wide, one card per community when narrow
- * (switched by a container query in app.css).
+ * A table when the results column is wide, one card per community when narrow.
  */
-import { useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import type { Strategy, StrategyResult } from '../../lib/calc';
 import { STRATEGY_COPY } from '../../lib/copy';
 import { formatCurrency, formatInt } from '../../lib/format';
@@ -15,6 +14,8 @@ interface Props {
   results: readonly StrategyResult[];
   strategy: Strategy;
   budget: number;
+  /** Room for the table; otherwise cards. */
+  wide: boolean;
 }
 
 /** Communities shown before "Show all", so a long selection does not push the rest of the results away. */
@@ -32,12 +33,13 @@ function Cell({ allocation, reached, most }: DistributionRow['cells'][number]) {
   );
 }
 
-export default function Distribution({ results, strategy, budget }: Props) {
+export default function Distribution({ results, strategy, budget, wide }: Props) {
   const [showAll, setShowAll] = useState(false);
-  const view = distribution(results, strategy);
+  const view = useMemo(() => distribution(results, strategy), [results, strategy]);
   const rows = showAll ? view.rows : view.rows.slice(0, FIRST_ROWS);
   const hidden = view.rows.length - rows.length;
   const selectedMark = (s: Strategy) => (s === strategy ? ' (selected)' : '');
+  const colClass = (s: Strategy) => (s === strategy ? 'num col-selected' : 'num');
 
   return (
     <section aria-labelledby="distribution-heading" class="module distribution" id="distribution">
@@ -47,6 +49,7 @@ export default function Distribution({ results, strategy, budget }: Props) {
         strategy that gives a community the most. Communities are listed by their share under {STRATEGY_COPY[strategy].name}.
       </p>
 
+      {wide ? (
       <TableWrap label="Allocation by community and strategy" class="distribution__table">
         <table>
           <caption>Allocation by community and strategy</caption>
@@ -54,7 +57,7 @@ export default function Distribution({ results, strategy, budget }: Props) {
             <tr>
               <th scope="col">Community</th>
               {view.totals.map((t) => (
-                <th scope="col" class={`num${t.strategy === strategy ? ' col-selected' : ''}`} key={t.strategy}>
+                <th scope="col" class={colClass(t.strategy)} key={t.strategy}>
                   {STRATEGY_COPY[t.strategy].name}{selectedMark(t.strategy)}
                 </th>
               ))}
@@ -65,7 +68,7 @@ export default function Distribution({ results, strategy, budget }: Props) {
               <tr key={r.id}>
                 <th scope="row">{r.name}</th>
                 {r.cells.map((c) => (
-                  <td class={`num${c.strategy === strategy ? ' col-selected' : ''}`} key={c.strategy}><Cell {...c} /></td>
+                  <td class={colClass(c.strategy)} key={c.strategy}><Cell {...c} /></td>
                 ))}
               </tr>
             ))}
@@ -74,7 +77,7 @@ export default function Distribution({ results, strategy, budget }: Props) {
             <tr>
               <th scope="row">Total</th>
               {view.totals.map((t) => (
-                <td class={`num${t.strategy === strategy ? ' col-selected' : ''}`} key={t.strategy}>
+                <td class={colClass(t.strategy)} key={t.strategy}>
                   <span class="distribution__amount">{formatCurrency(t.allocation)}</span>
                   <span class="distribution__reached">{households(t.reached)}</span>
                 </td>
@@ -83,7 +86,7 @@ export default function Distribution({ results, strategy, budget }: Props) {
           </tfoot>
         </table>
       </TableWrap>
-
+      ) : (
       <ul class="distribution__cards" aria-label="Allocation by community and strategy">
         {rows.map((r) => (
           <li key={r.id} class="card">
@@ -99,6 +102,7 @@ export default function Distribution({ results, strategy, budget }: Props) {
           </li>
         ))}
       </ul>
+      )}
 
       {view.rows.length > FIRST_ROWS && (
         <button type="button" class="button button--secondary button--small" aria-expanded={showAll}

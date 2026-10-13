@@ -1,9 +1,9 @@
 """
 One-time edit: replace en and em dashes with hyphens in the Data_Dictionary
-`data_year` and `description` cells of the NourishScope workbook
+`data_year`, `description` and `source_label` cells (the columns build-data.ts guards) of the NourishScope workbook
 (UI/UX audit plan U2, R21). Year ranges such as "2020–2024" become "2020-2024".
 
-Only those two columns are touched; the Kentucky_Counties sheet is not opened
+Only those columns are touched; the Kentucky_Counties sheet is not opened
 for writing. Kept in the repo as a record of the edit. Running it again is safe:
 it reports that there is nothing to change.
 
@@ -14,7 +14,7 @@ import sys
 
 import openpyxl
 
-COLUMNS = ["data_year", "description"]
+COLUMNS = ["data_year", "description", "source_label"]
 DASHES = str.maketrans({"–": "-", "—": "-"})
 
 

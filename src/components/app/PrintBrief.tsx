@@ -3,7 +3,7 @@
  * print.css shows only this when printing (plan R11).
  */
 import type { Brief } from '../../lib/export/brief-model';
-import { formatCurrency, formatInt, formatPct } from '../../lib/format';
+import { formatCoverage, formatCurrency, formatInt, formatPct } from '../../lib/format';
 import { NOT_ENTERED_TEXT } from '../../lib/data/labels';
 
 function costLine(brief: Brief): string {
@@ -69,7 +69,7 @@ export default function PrintBrief({ brief, visible }: { brief: Brief; visible: 
       {brief.totals.coverageBefore !== null ? (
         <p>Coverage before: {formatPct(brief.totals.coverageBefore)}. After: {formatPct(brief.totals.coverageAfter!)}.</p>
       ) : (
-        <p>Coverage: {NOT_ENTERED_TEXT}</p>
+        <p>Coverage: {formatCoverage(null, brief.needOnly)}</p>
       )}
 
       <h3>All strategies</h3>

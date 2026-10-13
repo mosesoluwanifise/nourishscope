@@ -35,6 +35,8 @@ export interface Brief {
   isSample: boolean;
   dataSources: { source: string; years: string }[];
   needDefinition: string;
+  /** Households served is missing, so coverage reads "Not entered" rather than "Not available". */
+  needOnly: boolean;
   inputs: {
     budget: number;
     /** The global cost per household; null when every community's cost came from the file. */
@@ -114,6 +116,7 @@ export function buildBrief(state: PlanState, derived: Derived, now: Date): Brief
     isSample: state.source === 'sample',
     dataSources: dataSourcesList(state.source),
     needDefinition: derived.needDefinition,
+    needOnly: derived.needOnly,
     inputs: {
       budget: derived.budget,
       cost: derived.costFromUploadForAll ? null : derived.cost,

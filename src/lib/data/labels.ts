@@ -10,6 +10,11 @@ export const UPLOAD_SOURCE_TEXT = 'Source: your upload';
 export const SAMPLE_DATA_TEXT = 'Sample data (fictional)';
 /** A value the user could supply but has not (households served, and coverage built on it). */
 export const NOT_ENTERED_TEXT = 'Not entered';
+/** Coverage when total need is 0, so it cannot be calculated whatever the user enters. */
+export const COVERAGE_UNAVAILABLE_TEXT = 'Not available';
+
+/** Why coverage is blank: households served is missing (need-only mode), or total need is 0. */
+export const missingCoverageText = (needOnly: boolean) => (needOnly ? NOT_ENTERED_TEXT : COVERAGE_UNAVAILABLE_TEXT);
 
 export function isSuppressed(value: unknown): value is Suppressed {
   return typeof value === 'object' && value !== null && (value as Suppressed).status === 'suppressed';

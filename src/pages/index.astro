@@ -2,8 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AllocationPreview from '../components/AllocationPreview.astro';
 import { withBase } from '../config/site';
-import { STRATEGIES } from '../lib/calc';
-import { median } from '../lib/calc/health';
+import { median, preciseSum, STRATEGIES } from '../lib/calc';
 import { STRATEGY_COPY } from '../lib/copy';
 import { derivedLabel } from '../lib/data/labels';
 import { COUNTIES, FIELDS, STATE_MEDIANS } from '../lib/data/load';
@@ -17,7 +16,7 @@ const pillars = [
   {
     key: 'nutrition',
     title: 'Nutrition',
-    figure: formatInt(numbers('snap_households').reduce((a, b) => a + b, 0)),
+    figure: formatInt(preciseSum(numbers('snap_households'))),
     caption: 'Kentucky households receive SNAP.',
     label: derivedLabel('snap_households', 'total', FIELDS),
     text: 'Compare need across communities and test five ways to divide a fixed budget, with households reached and money left over for each.',
@@ -40,7 +39,11 @@ const pillars = [
   },
 ];
 
-const allocationOf = (name: string) => formatCurrency(exampleProportional.rows.find((r) => r.name === name)!.allocation);
+/** "Magoffin County $26,427.28, Wolfe County $14,663.46 and Owsley County $8,909.25", largest first. */
+const shares = [...exampleProportional.rows]
+  .sort((a, b) => b.allocation - a.allocation)
+  .map((r) => `${r.name} ${formatCurrency(r.allocation)}`);
+const sharesText = `${shares.slice(0, -1).join(', ')} and ${shares.at(-1)}`;
 ---
 <BaseLayout title="NourishScope">
   <section class="hero" aria-labelledby="hero-heading">
@@ -85,8 +88,7 @@ const allocationOf = (name: string) => formatCurrency(exampleProportional.rows.f
     <h2 id="example-summary-heading">The worked example, in one line</h2>
     <p>
       With {formatCurrency(EXAMPLE_BUDGET)} and a cost of {formatCurrency(EXAMPLE_COST_PER_HOUSEHOLD)} per household, sharing
-      by unmet need gives Magoffin County {allocationOf('Magoffin County')}, Wolfe County {allocationOf('Wolfe County')} and
-      Owsley County {allocationOf('Owsley County')}.
+      by unmet need gives {sharesText}.
     </p>
     <ul class="example-strategies">
       {exampleResults.map((r) => (

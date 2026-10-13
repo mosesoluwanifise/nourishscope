@@ -1,20 +1,12 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { selectCounties as workedExample } from './helpers';
 
 const PAGES = ['', 'app', 'methodology', 'data-sources', 'about', 'research', 'changelog', 'cite', 'privacy', 'accessibility', 'terms', 'contact'];
 
 async function axe(page: Page) {
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   return results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
-}
-
-async function workedExample(page: Page) {
-  await page.goto('app');
-  await page.getByLabel('Kentucky county data').check();
-  for (const name of ['Magoffin County', 'Owsley County', 'Wolfe County']) {
-    await page.getByRole('checkbox', { name: new RegExp(`^${name}`) }).check();
-  }
-  await page.getByLabel('Total budget').fill('50000');
 }
 
 test.describe('dark mode', () => {

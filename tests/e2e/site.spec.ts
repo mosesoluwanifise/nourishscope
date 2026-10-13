@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { selectCounties } from './helpers';
 
 const PAGES = ['', 'app', 'methodology', 'data-sources', 'about', 'research', 'changelog', 'cite', 'privacy', 'accessibility', 'terms', 'contact'];
 const ORIGIN = 'http://localhost:4322';
@@ -42,12 +43,7 @@ test('no page shows an em dash or en dash', async ({ page }) => {
     await page.goto(path);
     await check(`/${path}`);
   }
-  await page.goto('app');
-  await page.getByLabel('Kentucky county data').check();
-  for (const name of ['Magoffin County', 'Owsley County', 'Wolfe County']) {
-    await page.getByRole('checkbox', { name: new RegExp(`^${name}`) }).check();
-  }
-  await page.getByLabel('Total budget').fill('50000');
+  await selectCounties(page);
   await expect(page.locator('#module-nutrition')).toBeVisible();
   await check('/app with results');
   expect(offenders).toEqual([]);

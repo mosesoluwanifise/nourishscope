@@ -1,5 +1,5 @@
 /** Display formatting. Fixed wording for markers comes from labels.ts. */
-import { markerText } from './data/labels';
+import { markerText, missingCoverageText } from './data/labels';
 
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const integer = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
@@ -19,6 +19,11 @@ export function formatPct(value: number): string {
 
 export function formatDecimal1(value: number): string {
   return decimal1.format(value);
+}
+
+/** A coverage percentage, or the reason it is blank. */
+export function formatCoverage(value: number | null, needOnly: boolean): string {
+  return value === null ? missingCoverageText(needOnly) : formatPct(value);
 }
 
 /** Percentage points, with an explicit sign: "+25.0 points", "−5.0 points". */

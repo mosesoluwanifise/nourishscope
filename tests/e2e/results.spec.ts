@@ -1,11 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-
-async function selectCounties(page: Page, names: string[], budget = '50000') {
-  await page.goto('app');
-  await page.getByLabel('Kentucky county data').check();
-  for (const name of names) await page.getByRole('checkbox', { name: new RegExp(`^${name}`) }).check();
-  await page.getByLabel('Total budget').fill(budget);
-}
+import { selectCounties } from './helpers';
 
 test('need-only mode shows the coverage prompt and all five strategies (AE1)', async ({ page }) => {
   await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);

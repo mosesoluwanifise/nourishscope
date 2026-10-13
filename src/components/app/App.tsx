@@ -31,6 +31,7 @@ import {
 } from './Results';
 import { derive, hasUnsavedWork, INITIAL_STATE, withCost, withSource, type PlanState } from './state';
 import UploadPanel from './UploadPanel';
+import { useWideContainer } from './useWideContainer';
 import './app.css';
 
 const SAMPLE_ROWS = parseUpload(sampleCsv).rows;
@@ -61,6 +62,8 @@ export default function App() {
   const derived = useMemo(() => derive(state, SAMPLE_ROWS), [state]);
   const brief = useMemo(() => buildBrief(state, derived, new Date()), [state, derived]);
   const update = (patch: Partial<PlanState>) => setState((s) => ({ ...s, ...patch }));
+  // Tables need about 46rem; beside the 22rem inputs column a wide screen can still leave less.
+  const [resultsRef, wideResults] = useWideContainer(46);
 
   // Mark the island as hydrated so the shell's failure handler stays quiet.
   useEffect(() => {
@@ -159,7 +162,7 @@ export default function App() {
             />
           </section>
 
-          <section class="stage stage--results" aria-labelledby="stage-results" id="results">
+          <section class="stage stage--results" aria-labelledby="stage-results" id="results" ref={resultsRef}>
             <h2 id="stage-results" tabIndex={-1}><span class="stage__number">3</span> Results</h2>
             {derived.emptyMessage ? (
               <p class="callout empty-state">{derived.emptyMessage}</p>
@@ -171,8 +174,8 @@ export default function App() {
                   <ul>{SECTIONS.map(([id, label]) => <li key={id}><a href={`#${id}`}>{label}</a></li>)}</ul>
                 </nav>
                 <p class="change-inputs"><a href="#your-program">Change inputs</a></p>
-                <Distribution results={derived.results!} strategy={state.strategy} budget={derived.budget!} />
-                <NutritionModule derived={derived} strategy={state.strategy} />
+                <Distribution results={derived.results!} strategy={state.strategy} budget={derived.budget!} wide={wideResults} />
+                <NutritionModule derived={derived} strategy={state.strategy} wide={wideResults} />
                 <HealthModule derived={derived} />
                 <FoodModule derived={derived} />
                 <StrategyComparison derived={derived} strategy={state.strategy}

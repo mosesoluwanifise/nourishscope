@@ -1,6 +1,6 @@
 /** CSV export of the planning brief, built in the browser (plan R12). */
 import type { Brief } from './brief-model';
-import { NOT_ENTERED_TEXT } from '../data/labels';
+import { missingCoverageText, NOT_ENTERED_TEXT } from '../data/labels';
 
 const FORMULA_START = /^[=+\-@\t\r]/;
 
@@ -56,12 +56,12 @@ export function briefToCsv(brief: Brief): string {
     lines.push(line(['Coverage before (%)', brief.totals.coverageBefore]));
     lines.push(line(['Coverage after (%)', brief.totals.coverageAfter]));
   } else {
-    lines.push(line(['Coverage', NOT_ENTERED_TEXT]));
+    lines.push(line(['Coverage', missingCoverageText(brief.needOnly)]));
   }
   lines.push('');
 
   lines.push(line(['Strategy', 'Households reached', 'Spend', 'Unspent', 'Coverage after (%)']));
-  for (const c of brief.comparison) lines.push(line([c.strategy, c.reached, c.spend, c.unspent, c.coverageAfter ?? NOT_ENTERED_TEXT]));
+  for (const c of brief.comparison) lines.push(line([c.strategy, c.reached, c.spend, c.unspent, c.coverageAfter ?? missingCoverageText(brief.needOnly)]));
   lines.push('');
 
   lines.push(line(['Cost sensitivity', 'Households reached', 'Unspent']));
