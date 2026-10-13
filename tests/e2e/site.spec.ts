@@ -167,3 +167,34 @@ test.describe('Data Sources and About', () => {
     });
   }
 });
+
+test.describe('pinned header on phones', () => {
+  test.use({ viewport: { width: 375, height: 700 } });
+
+  test('stays at the top while scrolling, and Menu still works from there', async ({ page }) => {
+    await page.goto('methodology');
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    const header = (await page.locator('.site-header').boundingBox())!;
+    expect(header.y).toBe(0);
+    await page.locator('.site-header__menu summary').click();
+    await page.getByRole('navigation', { name: 'Main (menu)' }).getByRole('link', { name: 'About' }).click();
+    await expect(page).toHaveURL(/\/about$/);
+  });
+
+  test('anchor jumps land below the header, not under it', async ({ page }) => {
+    await page.goto('methodology');
+    await page.getByRole('navigation', { name: 'On this page' }).getByRole('link', { name: '8. Evaluation module' }).click();
+    await expect(page).toHaveURL(/#evaluation$/);
+    const header = (await page.locator('.site-header').boundingBox())!;
+    const heading = (await page.locator('#evaluation').boundingBox())!;
+    expect(heading.y).toBeGreaterThanOrEqual(header.y + header.height);
+  });
+});
+
+test('on a wide screen the header scrolls away with the page', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('methodology');
+  await page.evaluate(() => window.scrollTo(0, 2000));
+  const header = (await page.locator('.site-header').boundingBox())!;
+  expect(header.y).toBeLessThan(0);
+});
