@@ -3,7 +3,8 @@ import type { DataSource } from '../../lib/data/merge';
 
 interface Props {
   source: DataSource | null;
-  onChoose: (source: DataSource) => void;
+  /** Returns false when the switch was cancelled. */
+  onChoose: (source: DataSource) => boolean;
 }
 
 const OPTIONS: { value: DataSource; title: string; text: string }[] = [
@@ -36,7 +37,16 @@ export default function DataSourcePicker({ source, onChoose }: Props) {
               name="data-source"
               value={o.value}
               checked={source === o.value}
-              onChange={() => onChoose(o.value)}
+              onChange={(e) => {
+                // Preact does not re-assert radio state without a re-render, so undo a cancelled switch here.
+                if (!onChoose(o.value)) {
+                  (e.currentTarget as HTMLInputElement).checked = false;
+                  const current = (e.currentTarget as HTMLInputElement).form?.querySelector<HTMLInputElement>(
+                    `input[name="data-source"][value="${source}"]`,
+                  ) ?? document.querySelector<HTMLInputElement>(`input[name="data-source"][value="${source}"]`);
+                  if (current) current.checked = true;
+                }
+              }}
             />
             <span class="source-option__title">{o.title}</span>
             <span class="source-option__text">{o.text}</span>

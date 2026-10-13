@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { roundHalfEven, preciseSum } from '../../src/lib/calc/rounding';
+import { exactRoundHalfEven, preciseSum, roundHalfEven } from '../../src/lib/calc/rounding';
 
 describe('roundHalfEven matches Python round()', () => {
   it.each([
@@ -29,6 +29,40 @@ describe('roundHalfEven matches Python round()', () => {
   it('returns integers and already-rounded values unchanged', () => {
     expect(roundHalfEven(50000, 2)).toBe(50000);
     expect(roundHalfEven(26427.28, 2)).toBe(26427.28);
+  });
+});
+
+describe('the fast path agrees with the exact method', () => {
+  // Deterministic pseudo-random values (mulberry32) so failures are reproducible.
+  function random(seed: number) {
+    return () => {
+      seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  it('over 200,000 values shaped like allocations, costs and percentages', () => {
+    const next = random(20261012);
+    for (let i = 0; i < 200_000; i++) {
+      const digits = i % 3;
+      const magnitude = [1, 100, 10_000, 1_000_000][i % 4];
+      const base = next() * magnitude;
+      // Every fifth value sits on or near a decimal tie, where the paths could disagree.
+      const x = i % 5 === 0 ? Math.round(base * 10 ** digits) / 10 ** digits + 0.5 / 10 ** digits : base;
+      const signed = i % 7 === 0 ? -x : x;
+      expect(roundHalfEven(signed, digits)).toBe(exactRoundHalfEven(signed, digits));
+    }
+  });
+
+  it('on allocation-style quotients', () => {
+    for (let budget = 1; budget <= 3000; budget += 7) {
+      for (const n of [3, 7, 9, 11, 13, 40]) {
+        const x = (budget * 1000.05) / n;
+        expect(roundHalfEven(x, 2)).toBe(exactRoundHalfEven(x, 2));
+      }
+    }
   });
 });
 

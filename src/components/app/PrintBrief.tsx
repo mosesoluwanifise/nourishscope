@@ -5,6 +5,14 @@
 import type { Brief } from '../../lib/export/brief-model';
 import { formatCurrency, formatInt, formatPct } from '../../lib/format';
 
+function costLine(brief: Brief): string {
+  const { cost, costSource, costConfirmed } = brief.inputs;
+  if (costSource === 'file') return 'per community, from your file (see table)';
+  const value = formatCurrency(cost ?? 0);
+  const note = costConfirmed ? 'confirmed by user' : 'example value, not confirmed';
+  return costSource === 'mixed' ? `${value} (${note}), unless your file gives a community its own cost` : `${value} (${note})`;
+}
+
 export default function PrintBrief({ brief, visible }: { brief: Brief; visible: boolean }) {
   return (
     <article id="planning-brief" tabIndex={-1} class={`print-brief${visible ? '' : ' print-brief--hidden'}`} aria-label="Planning brief">
@@ -23,7 +31,7 @@ export default function PrintBrief({ brief, visible }: { brief: Brief; visible: 
       <h3>Inputs</h3>
       <ul>
         <li>Budget: {formatCurrency(brief.inputs.budget)}</li>
-        <li>Cost per household: {formatCurrency(brief.inputs.cost)} ({brief.inputs.costConfirmed ? 'confirmed by user' : 'example value, not confirmed'})</li>
+        <li>Cost per household: {costLine(brief)}</li>
         <li>Minimum for every community: {brief.inputs.floorSharePct}%</li>
         <li>Strategy shown by community: {brief.strategyName}</li>
       </ul>
@@ -35,23 +43,25 @@ export default function PrintBrief({ brief, visible }: { brief: Brief; visible: 
             <th scope="col">Community</th><th scope="col">County</th>
             <th scope="col" class="num">Households in need</th><th scope="col" class="num">Served</th>
             <th scope="col" class="num">Still needing help</th><th scope="col" class="num">Health burden</th>
-            <th scope="col">Rural or distressed</th><th scope="col" class="num">Allocation</th>
+            <th scope="col">Rural or distressed</th><th scope="col" class="num">Cost per household</th>
+            <th scope="col" class="num">Allocation</th>
             <th scope="col" class="num">Reached</th><th scope="col" class="num">Spend</th>
           </tr>
         </thead>
         <tbody>
-          {brief.rows.map((r) => (
-            <tr key={`${r.community}-${r.county}`}>
+          {brief.rows.map((r, i) => (
+            <tr key={i}>
               <th scope="row">{r.community}</th><td>{r.county}</td>
               <td class="num">{formatInt(r.need)}</td><td class="num">{r.served === null ? '—' : formatInt(r.served)}</td>
               <td class="num">{formatInt(r.unmet)}</td><td class="num">{r.healthIndex.toFixed(3)}</td>
-              <td>{r.flag ? 'Yes' : 'No'}</td><td class="num">{formatCurrency(r.allocation)}</td>
+              <td>{r.flag ? 'Yes' : 'No'}</td><td class="num">{formatCurrency(r.cost)}</td>
+              <td class="num">{formatCurrency(r.allocation)}</td>
               <td class="num">{formatInt(r.reached)}</td><td class="num">{formatCurrency(r.spend)}</td>
             </tr>
           ))}
         </tbody>
         <tfoot>
-          <tr><th scope="row" colSpan={8}>Total (unspent {formatCurrency(brief.totals.unspent)})</th>
+          <tr><th scope="row" colSpan={9}>Total (unspent {formatCurrency(brief.totals.unspent)})</th>
             <td class="num">{formatInt(brief.totals.reached)}</td><td class="num">{formatCurrency(brief.totals.spend)}</td></tr>
         </tfoot>
       </table>

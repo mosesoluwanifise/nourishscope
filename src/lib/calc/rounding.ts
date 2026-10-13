@@ -11,6 +11,27 @@
 export function roundHalfEven(x: number, digits: number): number {
   if (!Number.isFinite(x) || Number.isInteger(x)) return x;
   const negative = x < 0;
+
+  // Fast path: when x is clearly not near a rounding tie, ordinary rounding of the
+  // scaled value gives the same answer as the exact decimal method, and the
+  // integer / 10^digits division is correctly rounded like Python's result.
+  // Anything within 1e-6 of a tie (or too large to scale safely) takes the exact path.
+  const factor = 10 ** digits;
+  const scaled = Math.abs(x) * factor;
+  if (digits <= 15 && scaled < 2 ** 40) {
+    const fractional = scaled - Math.floor(scaled);
+    if (Math.abs(fractional - 0.5) > 1e-6) {
+      const rounded = Math.round(scaled) / factor;
+      return negative ? -rounded : rounded;
+    }
+  }
+  return exactRoundHalfEven(x, digits);
+}
+
+/** The exact decimal method behind roundHalfEven, exported so tests can compare the fast path with it. */
+export function exactRoundHalfEven(x: number, digits: number): number {
+  if (!Number.isFinite(x) || Number.isInteger(x)) return x;
+  const negative = x < 0;
   // toFixed(100) prints the exact binary value for the magnitudes used here.
   const exact = Math.abs(x).toFixed(100);
   const [intPart, fracPart] = exact.split('.');

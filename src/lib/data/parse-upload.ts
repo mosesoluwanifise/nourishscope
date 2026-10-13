@@ -89,6 +89,9 @@ export function parseUpload(text: string, sizeBytes: number = text.length): Pars
 
   const parsed = Papa.parse<string[]>(text.replace(/^﻿/, ''), { skipEmptyLines: 'greedy' });
   const [headerRow, ...dataRows] = parsed.data;
+  if (!headerRow || headerRow.every((h) => !h.trim())) {
+    return { fileErrors: ['The file has no header row. Download the template to see the expected columns.'], rows: [] };
+  }
   if (dataRows.length > MAX_UPLOAD_ROWS) {
     return { fileErrors: ['This file has more than 2,000 rows. Upload one row per community.'], rows: [] };
   }

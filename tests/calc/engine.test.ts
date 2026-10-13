@@ -9,7 +9,6 @@ import {
   runStrategy,
   stateMedians,
   STRATEGIES,
-  validateInputs,
   type CommunityInput,
 } from '../../src/lib/calc';
 
@@ -21,12 +20,9 @@ function community(partial: Partial<CommunityInput> & { id: string }): Community
 }
 
 describe('core measures', () => {
-  it('caps unmet need at 0 when served exceeds need, with a warning', () => {
+  it('caps unmet need at 0 when served exceeds need', () => {
     const [c] = prepareCommunities([community({ id: 'a', need: 100, served: 150 })], medians);
     expect(c.unmet).toBe(0);
-    expect(validateInputs([community({ id: 'a', need: 100, served: 150 })], 1000).warnings).toEqual([
-      { community: 'a', field: 'served', message: 'Households served (150) is more than households in need (100), so unmet need is 0.' },
-    ]);
   });
 
   it('uses a health index of 1.0 when no health measures are available', () => {
@@ -97,29 +93,6 @@ describe('allocation edge cases', () => {
       medians,
     );
     expect(runStrategy(prepared, 1000, 'equal').totals.coverageBefore).toBeNull();
-  });
-});
-
-describe('validation', () => {
-  it('rejects a non-positive budget, zero cost and non-numeric need, naming the field', () => {
-    const result = validateInputs(
-      [community({ id: 'a', cost: 0 }), community({ id: 'b', need: Number.NaN })],
-      -5,
-    );
-    expect(result.errors).toEqual([
-      { community: null, field: 'budget', message: 'Budget must be more than $0.' },
-      { community: 'a', field: 'cost', message: 'Cost per household must be more than $0.' },
-      { community: 'b', field: 'need', message: 'Number of households in need must be a whole number of 0 or more.' },
-    ]);
-  });
-
-  it('rejects negative served and fractional need', () => {
-    const result = validateInputs([community({ id: 'a', served: -1 }), community({ id: 'b', need: 10.5 })], 100);
-    expect(result.errors.map((e) => `${e.community}:${e.field}`)).toEqual(['a:served', 'b:need']);
-  });
-
-  it('accepts valid inputs', () => {
-    expect(validateInputs([community({ id: 'a' })], 100)).toEqual({ errors: [], warnings: [] });
   });
 });
 

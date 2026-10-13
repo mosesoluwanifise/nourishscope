@@ -14,7 +14,7 @@ export const EXAMPLE_COST = 100;
 export type DataSource = 'kentucky' | 'sample' | 'upload';
 
 /** 'user' means the person replaced a county's SNAP default in the app. */
-export type NeedSource = 'snap' | 'user' | 'upload';
+export type NeedSource = 'snap' | 'user' | 'upload' | 'sample';
 
 export interface AssembledCommunity {
   input: CommunityInput;
@@ -122,7 +122,7 @@ export function assembleFromUpload(
       },
       county,
       source,
-      needSource: 'upload',
+      needSource: source === 'sample' ? 'sample' : 'upload',
       costFromUpload: row.cost !== null,
       overrides,
       lowIncomeLowAccessPct: row.lowIncomeLowAccessPct ?? county.low_income_low_access_pct,

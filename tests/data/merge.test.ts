@@ -91,5 +91,6 @@ describe('sample data', () => {
     expect(flagged).toEqual([]);
     expect(communities).toHaveLength(6);
     expect(communities.every((c) => c.source === 'sample' && c.input.name.includes('(fictional)'))).toBe(true);
+    expect(communities.every((c) => c.needSource === 'sample')).toBe(true);
   });
 });

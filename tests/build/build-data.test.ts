@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import readExcelFile from 'read-excel-file/node';
-import { buildDataset, DatasetError } from '../../scripts/build-data';
+import { buildDataset as buildFull, DatasetError } from '../../scripts/build-data';
 
 const WORKBOOK = 'data/NourishScope_Kentucky_County_Dataset_v1.0.xlsx';
+const FIXTURE_KEYS = ['county_name', 'fips', 'state', 'appalachian', 'arc_status', 'diabetes_pct', 'grocery_stores_per_1000'];
+/** Real-workbook calls check every required key; small fixtures check only the keys they define. */
+const buildDataset = (counties: unknown[][], dictionary: unknown[][]) =>
+  buildFull(counties, dictionary, counties.length > 50 && dictionary.length > 20 ? undefined : FIXTURE_KEYS);
 
 async function readWorkbook() {
   const sheets = await readExcelFile(WORKBOOK);
@@ -176,6 +180,30 @@ describe('buildDataset validation', () => {
     });
     const problems = errorsOf(() => buildDataset(fixtureCounties(120), dictionary));
     expect(problems.join('\n')).toMatch(/diabetes_pct.*data_year/);
+  });
+
+  it('fails when the dictionary drops a key the app needs', () => {
+    const dictionary = fixtureDictionary();
+    const withoutDiabetes = dictionary.filter((row) => row[5] !== 'diabetes_pct');
+    const problems = errorsOf(() => buildFull(fixtureCounties(120), withoutDiabetes, FIXTURE_KEYS));
+    expect(problems.join('\n')).toMatch(/no row with key diabetes_pct/);
+  });
+
+  it('fails on a duplicated or non-Kentucky FIPS code', () => {
+    const counties = fixtureCounties(120, (row, i) => {
+      if (i === 1) row[1] = '21001';
+      if (i === 2) row[1] = '47001';
+    });
+    const problems = errorsOf(() => buildDataset(counties, fixtureDictionary())).join('\n');
+    expect(problems).toMatch(/FIPS 21001 appears more than once/);
+    expect(problems).toMatch(/47001 is not a Kentucky county code/);
+  });
+
+  it('fails on a percentage outside 0 to 100', () => {
+    const counties = fixtureCounties(120, (row, i) => {
+      if (i === 9) row[5] = 150;
+    });
+    expect(errorsOf(() => buildDataset(counties, fixtureDictionary())).join('\n')).toMatch(/County 10: diabetes_pct should be between 0 and 100/);
   });
 
   it('fails on a non-numeric value in a numeric field', () => {

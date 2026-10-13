@@ -20,6 +20,17 @@ const TEXT_KEYS = new Set(['county_name', 'fips', 'state', 'appalachian', 'arc_s
 const USER_ENTERED = 'User-entered';
 const BLANK_SENTINELS = new Set(['-9999', 'not reported']);
 
+/** Every field the app reads (the County type). Dropping one from the dictionary must fail the build. */
+export const REQUIRED_KEYS: readonly string[] = [
+  'county_name', 'fips', 'state', 'appalachian', 'arc_status', 'metro_nonmetro',
+  'population', 'total_households', 'snap_households', 'snap_household_pct',
+  'poverty_rate', 'child_poverty_rate', 'persistent_poverty', 'median_household_income',
+  'diabetes_pct', 'obesity_pct', 'high_bp_pct',
+  'low_income_low_access_pct', 'grocery_stores_per_1000', 'snap_retailers', 'farmers_markets', 'farmers_markets_snap',
+];
+/** Percentages and rates must lie between 0 and 100. */
+const isPercentKey = (key: string) => key.endsWith('_pct') || key.endsWith('_rate');
+
 export class DatasetError extends Error {
   constructor(public readonly problems: string[]) {
     super(`The county workbook has ${problems.length} problem(s):\n- ${problems.join('\n- ')}`);
@@ -77,8 +88,13 @@ function normaliseFips(value: unknown): string {
   return text(value).replace(/\.0+$/, '').padStart(5, '0');
 }
 
-export function buildDataset(countyRows: unknown[][], dictionaryRows: unknown[][]): Dataset {
+export function buildDataset(
+  countyRows: unknown[][],
+  dictionaryRows: unknown[][],
+  requiredKeys: readonly string[] = REQUIRED_KEYS,
+): Dataset {
   const problems: string[] = [];
+  if (!countyRows.length || !dictionaryRows.length) throw new DatasetError(['a sheet in the workbook is empty']);
   const dictionary = readDictionary(dictionaryRows, problems);
   if (problems.length) throw new DatasetError(problems);
 
@@ -93,6 +109,11 @@ export function buildDataset(countyRows: unknown[][], dictionaryRows: unknown[][
     if (entry.public && (!entry.source_label || !entry.data_year)) {
       problems.push(`field ${entry.key} is missing its source_label or data_year in Data_Dictionary`);
     }
+  }
+
+  const keys = new Set(used.map((e) => e.key));
+  for (const key of requiredKeys) {
+    if (!keys.has(key)) problems.push(`Data_Dictionary has no row with key ${key}, which the app needs`);
   }
 
   const dataRows = countyRows.slice(1).filter((row) => row.some((cell) => !isBlank(cell)));
@@ -126,13 +147,24 @@ export function buildDataset(countyRows: unknown[][], dictionaryRows: unknown[][
         county[entry.key] = text(value);
       } else {
         const number = typeof value === 'number' ? value : Number(text(value));
-        if (Number.isFinite(number)) county[entry.key] = number;
-        else problems.push(`${label}: ${entry.key} should be a number but is "${text(value)}"`);
+        if (!Number.isFinite(number)) problems.push(`${label}: ${entry.key} should be a number but is "${text(value)}"`);
+        else if (isPercentKey(entry.key) && (number < 0 || number > 100)) {
+          problems.push(`${label}: ${entry.key} should be between 0 and 100 but is ${number}`);
+        } else county[entry.key] = number;
       }
     }
     return county as unknown as County;
   });
 
+  const seenFips = new Set<string>();
+  const seenNames = new Set<string>();
+  for (const c of counties) {
+    if (c.fips && !/^21\d{3}$/.test(c.fips)) problems.push(`${c.county_name}: FIPS ${c.fips} is not a Kentucky county code`);
+    if (seenFips.has(c.fips)) problems.push(`FIPS ${c.fips} appears more than once`);
+    if (seenNames.has(c.county_name)) problems.push(`${c.county_name} appears more than once`);
+    seenFips.add(c.fips);
+    seenNames.add(c.county_name);
+  }
   if (problems.length) throw new DatasetError(problems);
 
   counties.sort((a, b) => a.fips.localeCompare(b.fips));

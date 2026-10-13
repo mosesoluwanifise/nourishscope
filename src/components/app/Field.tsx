@@ -1,7 +1,7 @@
 /**
  * Labelled input with the shared validation pattern (plan U5): the message
  * sits under the field, is linked with aria-describedby, and shows after
- * the field loses focus or once `forceShow` is set.
+ * the field loses focus.
  */
 import { useState } from 'preact/hooks';
 
@@ -16,16 +16,15 @@ interface Props {
   prefix?: string;
   suffix?: string;
   inputMode?: 'decimal' | 'numeric';
-  forceShow?: boolean;
   compact?: boolean;
 }
 
 export default function Field({
   id, label, value, onInput, hint, error, warning, prefix, suffix,
-  inputMode = 'decimal', forceShow = false, compact = false,
+  inputMode = 'decimal', compact = false,
 }: Props) {
   const [touched, setTouched] = useState(false);
-  const showError = Boolean(error) && (touched || forceShow);
+  const showError = Boolean(error) && touched;
   const describedBy = [hint && `${id}-hint`, showError && `${id}-error`, warning && `${id}-warning`]
     .filter(Boolean).join(' ') || undefined;
 

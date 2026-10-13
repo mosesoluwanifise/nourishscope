@@ -66,7 +66,10 @@ test('upload: flagged rows can be fixed with the county picker', async ({ page }
   await expect(page.locator('#upload-summary')).toBeFocused();
   expect(await axe(page)).toEqual([]);
 
-  await page.getByLabel('Kentucky county for row 3').selectOption({ label: 'Allen County' });
+  // The county options render when the control gets focus, as with a tap or Tab.
+  const picker = page.getByLabel('Kentucky county for row 3');
+  await picker.focus();
+  await picker.selectOption({ label: 'Allen County' });
   await expect(page.locator('#upload-summary')).toHaveText('2 of 2 rows matched a Kentucky county');
   await expect(page.locator('#matched-heading')).toBeFocused();
 });

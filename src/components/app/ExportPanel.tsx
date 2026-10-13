@@ -32,7 +32,8 @@ export default function ExportPanel({ brief, costConfirmed, previewOpen, setPrev
     document.body.appendChild(a);
     a.click();
     a.remove();
-    URL.revokeObjectURL(url);
+    // Revoking straight after click can cancel the download in some browsers.
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return (

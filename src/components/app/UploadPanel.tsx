@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { UPLOAD_TEMPLATE_PATH, withBase } from '../../config/site';
 import { COUNTIES } from '../../lib/data/load';
 import type { AssembledCommunity, FlaggedRow } from '../../lib/data/merge';
-import { MAX_UPLOAD_BYTES, parseUpload } from '../../lib/data/parse-upload';
+import { MAX_UPLOAD_BYTES, parseUpload, type ParsedUpload } from '../../lib/data/parse-upload';
 import type { UploadState } from './state';
 
 interface Props {
@@ -16,6 +16,21 @@ interface Props {
   onUpload: (upload: UploadState) => void;
   onFix: (rowNumber: number, fips: string) => void;
   onContinue: () => void;
+}
+
+/**
+ * County dropdown for a flagged row. The 120 options render only once the
+ * control is used, so a large file with many flagged rows stays light.
+ */
+function CountyPicker({ id, onPick }: { id: string; onPick: (fips: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <select id={id} onFocus={() => setOpen(true)} onMouseDown={() => setOpen(true)}
+      onChange={(e) => { const fips = (e.currentTarget as HTMLSelectElement).value; if (fips) onPick(fips); }}>
+      <option value="">Choose a county…</option>
+      {open && COUNTIES.map((c) => <option value={c.fips} key={c.fips}>{c.county_name}</option>)}
+    </select>
+  );
 }
 
 export default function UploadPanel({ upload, communities, flagged, onUpload, onFix, onContinue }: Props) {
@@ -45,10 +60,18 @@ export default function UploadPanel({ upload, communities, flagged, onUpload, on
     const file = input.files?.[0];
     if (!file) return;
     setParsing(true);
-    const text = file.size > MAX_UPLOAD_BYTES ? '' : await file.text();
-    const parsed = parseUpload(text, file.size);
+    let parsed: ParsedUpload;
+    try {
+      const text = file.size > MAX_UPLOAD_BYTES ? '' : await file.text();
+      parsed = parseUpload(text, file.size);
+    } catch {
+      parsed = { fileErrors: ['This file could not be read. Save it as a CSV and try again.'], rows: [] };
+    } finally {
+      setParsing(false);
+      // Clear the input so choosing the same (corrected) file again fires change.
+      input.value = '';
+    }
     focusAfterUpload.current = true;
-    setParsing(false);
     onUpload({ fileName: file.name, parsed, countyFixes: {}, continued: false });
   };
 
@@ -97,13 +120,7 @@ export default function UploadPanel({ upload, communities, flagged, onUpload, on
                       {countyProblem && f.row.issues.length === 0 && (
                         <div class="field">
                           <label for={id}>Kentucky county for row {f.row.rowNumber}</label>
-                          <select id={id} onChange={(e) => {
-                            const fips = (e.currentTarget as HTMLSelectElement).value;
-                            if (fips) { focusAfterFix.current = f.row.rowNumber; onFix(f.row.rowNumber, fips); }
-                          }}>
-                            <option value="">Choose a county…</option>
-                            {COUNTIES.map((c) => <option value={c.fips} key={c.fips}>{c.county_name}</option>)}
-                          </select>
+                          <CountyPicker id={id} onPick={(fips) => { focusAfterFix.current = f.row.rowNumber; onFix(f.row.rowNumber, fips); }} />
                         </div>
                       )}
                     </li>

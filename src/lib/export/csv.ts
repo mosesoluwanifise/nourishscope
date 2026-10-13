@@ -11,7 +11,15 @@ export function csvCell(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '';
   const safe = FORMULA_START.test(value) ? `'${value}` : value;
-  return /[",\r\n\t]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+  // Quote on ';' too: Excel in some locales splits on it, which could expose a formula-leading fragment.
+  return /[",;\r\n\t]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+}
+
+/** The cost line: the entered value, or where per-community costs came from. */
+export function costText(brief: Brief): string | number {
+  if (brief.inputs.costSource === 'file') return 'Per community, from your file (see table)';
+  if (brief.inputs.costSource === 'mixed') return `${brief.inputs.cost} unless your file gives a community its own cost (see table)`;
+  return brief.inputs.cost ?? '';
 }
 
 const line = (cells: (string | number | null | undefined)[]) => cells.map(csvCell).join(',');
@@ -25,9 +33,11 @@ export function briefToCsv(brief: Brief): string {
   lines.push(line(['Data mode', brief.dataMode]));
   lines.push(line(['Definition of need used', brief.needDefinition]));
   lines.push(line(['Budget', brief.inputs.budget]));
-  lines.push(line(['Cost per household', brief.inputs.cost]));
+  lines.push(line(['Cost per household', costText(brief)]));
   lines.push(line(['Minimum for every community (%)', brief.inputs.floorSharePct]));
-  lines.push(line(['Cost confirmed by user', brief.inputs.costConfirmed ? 'Yes' : 'No']));
+  if (brief.inputs.costSource !== 'file') {
+    lines.push(line(['Cost confirmed by user', brief.inputs.costConfirmed ? 'Yes' : 'No']));
+  }
   lines.push(line(['Strategy shown per community', brief.strategyName]));
   for (const s of brief.dataSources) lines.push(line(['Data source', s.source, s.years]));
   lines.push('');

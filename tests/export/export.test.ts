@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import Papa from 'papaparse';
 import { derive, INITIAL_STATE, withSource, type PlanState } from '../../src/components/app/state';
-import { buildBrief } from '../../src/lib/export/brief-model';
+import { ASSUMPTIONS, buildBrief, localIsoDate } from '../../src/lib/export/brief-model';
+import { STATE_MEDIANS } from '../../src/lib/data/load';
 import { briefToCsv, csvCell } from '../../src/lib/export/csv';
 import { parseUpload } from '../../src/lib/data/parse-upload';
 import { COUNTIES } from '../../src/lib/data/load';
@@ -28,7 +29,7 @@ describe('brief model', () => {
     expect(brief.methodologyVersion).toBe('1.0');
     expect(brief.dataMode).toBe('Kentucky public data');
     expect(brief.needDefinition).toMatch(/^SNAP households/);
-    expect(brief.inputs).toEqual({ budget: 50000, cost: 100, floorSharePct: 5, costConfirmed: false });
+    expect(brief.inputs).toEqual({ budget: 50000, cost: 100, costSource: 'entered', floorSharePct: 5, costConfirmed: false });
     expect(brief.rows.map((r) => [r.community, r.allocation, r.reached])).toEqual([
       ['Magoffin County', 26427.28, 264],
       ['Owsley County', 8909.25, 89],
@@ -44,6 +45,33 @@ describe('brief model', () => {
     ]);
     expect(brief.dataSources.map((s) => s.source)).toContain('CDC PLACES');
     expect(brief.assumptions.length).toBeGreaterThan(3);
+  });
+
+  it('does not present the unused $100 as a confirmed cost when costs come from the file', () => {
+    const state: PlanState = { ...withSource(INITIAL_STATE, 'sample'), budgetText: '50000' };
+    const brief = buildBrief(state, derive(state, SAMPLE_ROWS), NOW)!;
+    expect(brief.inputs.cost).toBeNull();
+    expect(brief.inputs.costSource).toBe('file');
+    const csv = briefToCsv(brief);
+    expect(csv).toContain('Cost per household,"Per community, from your file (see table)"');
+    expect(csv).not.toContain('Cost confirmed by user');
+    expect(brief.rows.map((r) => r.cost)).toEqual([95, 120, 105, 130, 100, 115]);
+  });
+
+  it.each([7, 29, 57])('reports a %d%% floor share without float noise', (pct) => {
+    const state = { ...workedExample(), floorPctText: String(pct) };
+    expect(buildBrief(state, derive(state, SAMPLE_ROWS), NOW)!.inputs.floorSharePct).toBe(pct);
+  });
+
+  it('dates the brief in local time', () => {
+    const lateEvening = new Date(2026, 9, 12, 23, 30);
+    expect(localIsoDate(lateEvening)).toBe('2026-10-12');
+  });
+
+  it('states the Kentucky medians from the data, so a refresh cannot leave them stale', () => {
+    const sentence = ASSUMPTIONS.find((a) => a.includes('Kentucky medians'))!;
+    expect(sentence).toContain(`diabetes ${STATE_MEDIANS.diabetes_pct}%`);
+    expect(sentence).toContain(`obesity ${STATE_MEDIANS.obesity_pct}%`);
   });
 
   it('is null until results exist', () => {
@@ -83,6 +111,10 @@ describe('CSV export', () => {
     ['\rCR', `"'\rCR"`],
   ])('neutralises formula-leading text %j', (input, expected) => {
     expect(csvCell(input)).toBe(expected);
+  });
+
+  it('quotes cells containing a semicolon', () => {
+    expect(csvCell('Foo;=1+1')).toBe('"Foo;=1+1"');
   });
 
   it('leaves numbers, including negatives, unprefixed', () => {

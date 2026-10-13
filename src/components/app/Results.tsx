@@ -35,12 +35,17 @@ export function NutritionModule({ derived, strategy }: StrategyProps) {
         Showing <strong>{STRATEGY_COPY[strategy].name}</strong>. {STRATEGY_COPY[strategy].explain}{' '}
         Change it under <a href="#compare">Compare strategies</a>.
       </p>
-      {derived.needOnly ? (
-        <p class="callout">Coverage: — <br />Enter the number of households served for every community to see coverage.</p>
+      {result.totals.coverageBefore === null || result.totals.coverageAfter === null ? (
+        <p class="callout">
+          Coverage: — <br />
+          {derived.needOnly
+            ? 'Enter the number of households served for every community to see coverage.'
+            : 'Coverage cannot be calculated because the total number of households in need is 0.'}
+        </p>
       ) : (
         <p class="callout">
-          Coverage before: <strong>{formatPct(result.totals.coverageBefore!)}</strong>. Coverage after this plan:{' '}
-          <strong>{formatPct(result.totals.coverageAfter!)}</strong>.
+          Coverage before: <strong>{formatPct(result.totals.coverageBefore)}</strong>. Coverage after this plan:{' '}
+          <strong>{formatPct(result.totals.coverageAfter)}</strong>.
         </p>
       )}
       <TableWrap label="Allocation by community">

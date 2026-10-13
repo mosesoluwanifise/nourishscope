@@ -84,6 +84,37 @@ describe('derive: results', () => {
     expect(d.needDefinition).toMatch(/^Mixed/);
   });
 
+  it.each([
+    ['budgetText', 'abc', 'budget', 'Enter a budget of more than $0.'],
+    ['budgetText', '-5', 'budget', 'Enter a budget of more than $0.'],
+    ['costText', '0', 'cost', 'Enter a cost per household of more than $0.'],
+    ['costText', 'abc', 'cost', 'Enter a cost per household of more than $0.'],
+    ['floorPctText', '-1', 'floor', 'Enter a minimum share between 0 and 100%.'],
+  ] as const)('rejects %s = %j with an inline error and no results', (key, value, field, message) => {
+    const d = derive(kentucky({ [key]: value }), SAMPLE_ROWS);
+    expect(d.errors[field]).toBe(message);
+    expect(d.results).toBeNull();
+  });
+
+  it.each(['abc', '10.5', '-3'])('rejects a county need override of %j', (value) => {
+    const m = fipsOf('Magoffin County');
+    const d = derive(kentucky({ needText: { [m]: value } }), SAMPLE_ROWS);
+    expect(d.errors.need[m]).toBe('Enter a whole number of 0 or more.');
+    expect(d.results).toBeNull();
+  });
+
+  it('does not let an unused global cost block results when every community has its own cost', () => {
+    const d = derive({ ...withSource(INITIAL_STATE, 'sample'), budgetText: '50000', costText: '' }, SAMPLE_ROWS);
+    expect(d.errors.cost).toBeDefined();
+    expect(d.costFromUploadForAll).toBe(true);
+    expect(d.results).not.toBeNull();
+  });
+
+  it('describes sample-data need as fictional', () => {
+    const d = derive({ ...withSource(INITIAL_STATE, 'sample'), budgetText: '50000' }, SAMPLE_ROWS);
+    expect(d.needDefinition).toBe('Fictional figures from the sample data');
+  });
+
   it('validates the floor share', () => {
     expect(derive(kentucky({ floorPctText: '150' }), SAMPLE_ROWS).errors.floor).toMatch(/between 0 and 100/);
   });

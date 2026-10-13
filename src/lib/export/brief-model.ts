@@ -6,7 +6,9 @@ import type { Derived, PlanState } from '../../components/app/state';
 import type { EquityShares, ResultTotals } from '../calc';
 import { STRATEGY_COPY } from '../copy';
 import { METHODOLOGY_VERSION, TOOL_VERSION } from '../../config/site';
-import { FIELDS } from '../data/load';
+import { roundHalfEven } from '../calc/rounding';
+import { FIELDS, STATE_MEDIANS } from '../data/load';
+import { formatPct } from '../format';
 import type { DataSource } from '../data/merge';
 
 export interface BriefRow {
@@ -32,7 +34,14 @@ export interface Brief {
   isSample: boolean;
   dataSources: { source: string; years: string }[];
   needDefinition: string;
-  inputs: { budget: number; cost: number; floorSharePct: number; costConfirmed: boolean };
+  inputs: {
+    budget: number;
+    /** The global cost per household; null when every community's cost came from the file. */
+    cost: number | null;
+    costSource: 'entered' | 'file' | 'mixed';
+    floorSharePct: number;
+    costConfirmed: boolean;
+  };
   strategyName: string;
   rows: BriefRow[];
   totals: ResultTotals;
@@ -51,7 +60,7 @@ const DATA_MODE: Record<DataSource, string> = {
 export const ASSUMPTIONS = [
   'Households reached are rounded down: a partly funded household is not counted.',
   'Unspent money is reported, not redistributed.',
-  'The health burden score compares each county with fixed Kentucky medians from all 120 counties (diabetes 12.3%, obesity 40.3%, high blood pressure 36.7%).',
+  `The health burden score compares each county with fixed Kentucky medians from all 120 counties (diabetes ${formatPct(STATE_MEDIANS.diabetes_pct)}, obesity ${formatPct(STATE_MEDIANS.obesity_pct)}, high blood pressure ${formatPct(STATE_MEDIANS.high_bp_pct)}).`,
   'Health figures are county-level, age-adjusted adult prevalence from CDC PLACES (2024 release). They describe the county, not your participants.',
   'SNAP households estimate need; they are not a count of households eligible for or interested in your program.',
   'Public figures come from different years (2018–2024); see the source and year beside each figure.',
@@ -68,7 +77,18 @@ function dataSourcesList(source: DataSource): Brief['dataSources'] {
   return list;
 }
 
-const NEED_SOURCE_TEXT = { snap: 'SNAP households', user: 'Entered by you', upload: 'Your file' } as const;
+const NEED_SOURCE_TEXT = { snap: 'SNAP households', user: 'Entered by you', upload: 'Your file', sample: 'Sample data (fictional)' } as const;
+
+/** YYYY-MM-DD in the user's own time zone (an evening export is not dated tomorrow). */
+export function localIsoDate(now: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+function costSourceOf(derived: Derived): Brief['inputs']['costSource'] {
+  if (derived.costFromUploadForAll) return 'file';
+  return derived.communities.some((c) => c.costFromUpload) ? 'mixed' : 'entered';
+}
 
 /** Returns null until results exist. */
 export function buildBrief(state: PlanState, derived: Derived, now: Date): Brief | null {
@@ -78,7 +98,7 @@ export function buildBrief(state: PlanState, derived: Derived, now: Date): Brief
   const equity = derived.equity![strategyIndex];
 
   return {
-    generatedOn: now.toISOString().slice(0, 10),
+    generatedOn: localIsoDate(now),
     toolVersion: TOOL_VERSION,
     methodologyVersion: METHODOLOGY_VERSION,
     dataMode: DATA_MODE[state.source],
@@ -87,8 +107,9 @@ export function buildBrief(state: PlanState, derived: Derived, now: Date): Brief
     needDefinition: derived.needDefinition,
     inputs: {
       budget: derived.budget,
-      cost: derived.cost ?? NaN,
-      floorSharePct: derived.floorShare * 100,
+      cost: derived.costFromUploadForAll ? null : derived.cost,
+      costSource: costSourceOf(derived),
+      floorSharePct: roundHalfEven(derived.floorShare * 100, 6),
       costConfirmed: derived.costConfirmed,
     },
     strategyName: STRATEGY_COPY[state.strategy].name,

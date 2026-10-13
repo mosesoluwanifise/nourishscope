@@ -89,13 +89,15 @@ export default function App() {
     if (previewOpen) document.getElementById('planning-brief')?.focus();
   }, [previewOpen]);
 
-  const chooseSource = (source: DataSource) => {
-    if (source === state.source) return;
+  /** Returns false when the user cancels the switch. */
+  const chooseSource = (source: DataSource): boolean => {
+    if (source === state.source) return true;
     if (hasUnsavedWork({ ...state, budgetText: '' })
       && !window.confirm('Switching data clears your selected counties or uploaded file. Your budget and cost stay. Continue?')) {
-      return;
+      return false;
     }
     setState((s) => withSource(s, source));
+    return true;
   };
 
   const sourceLabel = currentSourceLabel(state);

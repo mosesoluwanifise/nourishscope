@@ -94,6 +94,19 @@ export interface Derived {
   needDefinition: string;
 }
 
+const NEED_DEFINITIONS: Record<NeedSource, string> = {
+  snap: 'SNAP households (U.S. Census Bureau, ACS 5-year 2020–2024)',
+  user: 'Your own figures',
+  upload: 'Number of households in need from your file',
+  sample: 'Fictional figures from the sample data',
+};
+
+function describeNeed(sources: Set<NeedSource>): string {
+  if (sources.size === 0) return '';
+  if (sources.size > 1) return 'Mixed: SNAP households for some communities, your own figures for others (see table)';
+  return NEED_DEFINITIONS[[...sources][0]];
+}
+
 /** "" -> null; "$1,200" -> 1200; "abc" -> NaN. */
 export function parseNumberInput(text: string): number | null {
   const cleaned = text.trim().replace(/[$,\s]/g, '');
@@ -170,7 +183,10 @@ export function derive(state: PlanState, sampleRows: readonly UploadRow[]): Deri
     }
   }
 
-  const hasFieldErrors = Boolean(errors.budget || errors.cost || errors.floor)
+  const costFromUploadForAll = communities.length > 0 && communities.every((c) => c.costFromUpload);
+  // The global cost is unused when every community brings its own, so it cannot block results.
+  const costBlocks = Boolean(errors.cost) && !costFromUploadForAll;
+  const hasFieldErrors = Boolean(errors.budget || costBlocks || errors.floor)
     || Object.keys(errors.need).length > 0 || Object.keys(errors.served).length > 0;
 
   let emptyMessage: string | null = null;
@@ -195,13 +211,8 @@ export function derive(state: PlanState, sampleRows: readonly UploadRow[]): Deri
     equity = results.map((r) => equityShares(prepared, r, budget));
   }
 
-  const costFromUploadForAll = communities.length > 0 && communities.every((c) => c.costFromUpload);
   const sources = new Set(Object.values(needSources));
-  const needDefinition = sources.size === 0 ? ''
-    : sources.size > 1 ? 'Mixed: SNAP households for some communities, your own figures for others (see table)'
-    : sources.has('snap') ? 'SNAP households (U.S. Census Bureau, ACS 5-year 2020–2024)'
-    : sources.has('user') ? 'Your own figures'
-    : 'Number of households in need from your file';
+  const needDefinition = describeNeed(sources);
 
   return {
     communities,
