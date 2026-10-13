@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../config/site';
+---
+{/* Built as 404.html. Cloudflare Pages serves it, with a 404 status, for any address that is not a page;
+    without it, Pages would treat the site as a single-page app and show Home instead. */}
+<BaseLayout title="Page not found" description="This page does not exist on NourishScope.">
+  <article class="doc prose">
+    <h1>Page not found</h1>
+    <p>There is no page at this address. It may have moved, or the link may have a typo.</p>
+    <ul>
+      <li><a href={withBase('/')}>Go to the home page</a></li>
+      <li><a href={withBase('/app')}>Open the planning tool</a></li>
+      <li><a href={withBase('/methodology')}>Read the methodology</a></li>
+    </ul>
+  </article>
+</BaseLayout>

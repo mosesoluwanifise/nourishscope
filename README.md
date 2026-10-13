@@ -45,9 +45,32 @@ npm run check
 
 ## Deploy
 
-Pushing to `main` runs `.github/workflows/deploy.yml`. It tests, builds and deploys to GitHub Pages. In the repository settings, set **Pages → Source** to **GitHub Actions**.
+The site is hosted on **Cloudflare Pages**, in the owner's Cloudflare account, built from this repository in the owner's GitHub account. GitHub Actions (`.github/workflows/ci.yml`) runs every test on each pull request and on `main`; Cloudflare builds and publishes `main` on its own.
 
-The site is served at the root of its own domain, `nourishscope.app` (set under **Pages → Custom domain**). The domain's DNS must point at GitHub Pages: four `A` records for the bare domain (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`) and a `CNAME` record for `www` pointing to `mosesoluwanifise.github.io`. To serve the site from a sub-path again, change `base` in `astro.config.mjs`.
+### One-time setup
+
+1. **Repository.** The repository must be in the owner's GitHub account (transfer it under **Settings → General → Transfer ownership**, or fork it).
+2. **Create the Pages project.** In the Cloudflare dashboard: **Workers & Pages → Create → Pages → Connect to Git**. Authorise GitHub, pick this repository, then set:
+   - Production branch: `main`
+   - Framework preset: `Astro`
+   - Build command: `npm run build`
+   - Build output directory: `dist`
+
+   Node comes from `.node-version`; no environment variables are needed. Save and deploy. The site appears at `<project>.pages.dev`.
+3. **Custom domain.** In the Pages project: **Custom domains → Set up a custom domain → `nourishscope.app`**, then the same for `www.nourishscope.app`.
+   - If the domain's DNS is already on Cloudflare (bought through Cloudflare, or its nameservers point to Cloudflare), Cloudflare adds the records itself.
+   - If not, either move the domain's nameservers to Cloudflare (**Add a domain** in the dashboard, then change the nameservers at the registrar), or add the `CNAME` records Cloudflare shows at the registrar.
+
+   HTTPS is set up automatically. Every `.app` domain needs it.
+4. **Leave Web Analytics off.** The Privacy page promises no analytics or tracking, so do not enable Cloudflare Web Analytics for this project.
+5. **Turn off the old GitHub Pages site**, if one exists: **Settings → Pages**, remove the custom domain, and set **Source** to **None**.
+
+### After that
+
+- Merging to `main` publishes the site within a few minutes. Cloudflare publishes `main` even if the tests fail, so merge only pull requests whose **Test** check is green.
+- Every pull request also gets its own preview link from Cloudflare, posted on the pull request.
+- `public/_headers` sets response headers: security headers on every page, and long caching for the hashed files in `/_astro/`.
+- The site is built for the root of its domain. To serve it from a sub-path, change `base` in `astro.config.mjs`.
 
 ## Refresh the data (yearly)
 
