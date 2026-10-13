@@ -8,8 +8,8 @@ description: Contact the NourishScope founder or request a demo.
 
 Questions, corrections, accessibility problems or ideas are welcome.
 
-**Email:** [Yetunde.Olaogun@uky.edu](mailto:Yetunde.Olaogun@uky.edu)
+**Email:** [Olaogunyetunde29@gmail.com](mailto:Olaogunyetunde29@gmail.com)
 
 ## Request a demo
 
-To arrange a walkthrough for your program or team, [email a demo request](mailto:Yetunde.Olaogun@uky.edu?subject=NourishScope%20demo%20request). Include your organisation and the counties you work in.
+To arrange a walkthrough for your program or team, [email a demo request](mailto:Olaogunyetunde29@gmail.com?subject=NourishScope%20demo%20request). Include your organisation and the counties you work in.

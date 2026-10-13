@@ -256,10 +256,11 @@ tbody tr:last-child td { border-bottom: 0; }
   padding: var(--space-4);
   max-width: 17rem;
 }
-.profile-card img { display: block; width: 100%; max-width: 15rem; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); }
+/* The photo keeps its own proportions (the founder portrait is 2:3), never cropped. */
+.profile-card img { display: block; width: 100%; max-width: 15rem; height: auto; border-radius: var(--radius); }
 .profile-card__name { margin: var(--space-3) 0 var(--space-1); font-weight: 700; font-size: 1.1rem; line-height: 1.3; }
 .profile-card__role { margin: 0; color: var(--color-text-muted); font-size: 0.9375rem; line-height: 1.45; }
-.profile-card__email { margin: var(--space-3) 0 0; font-size: 0.9375rem; overflow-wrap: anywhere; }
+.profile-card__email { margin: var(--space-3) 0 0; font-size: 0.9375rem; overflow-wrap: break-word; }
 /* Below the two-column width the card is a compact row: small photo beside the details. */
 @media (max-width: 63.99rem) {
   .profile-card {

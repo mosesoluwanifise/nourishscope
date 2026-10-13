@@ -26,10 +26,15 @@ const html = prefixRootLinks(await Astro.slots.render('default'), import.meta.en
   {profile ? (
     <div class="doc doc--aside">
       <aside class="doc__aside profile-card" aria-label={profile.name}>
-        <img src={withBase(profile.photo)} alt={profile.alt} width="240" height="240" />
+        <img src={withBase(profile.photo)} alt={profile.alt} width="640" height="960" />
         <p class="profile-card__name">{profile.name}</p>
         <p class="profile-card__role">{profile.role}</p>
-        {profile.email && <p class="profile-card__email"><a href={`mailto:${profile.email}`}>{profile.email}</a></p>}
+        {profile.email && (
+          <p class="profile-card__email">
+            {/* Long addresses wrap after the @, not in the middle of the domain. */}
+            <a href={`mailto:${profile.email}`}>{profile.email.split('@')[0]}@<wbr />{profile.email.split('@')[1]}</a>
+          </p>
+        )}
       </aside>
       <article class="doc__body prose">
         <Fragment set:html={html} />
