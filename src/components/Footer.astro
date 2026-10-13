@@ -1,0 +1,50 @@
+---
+import { METHODOLOGY_VERSION, REPO_URL, TOOL_VERSION, withBase } from '../config/site';
+
+const links = [
+  { href: '/changelog', label: 'Changelog' },
+  { href: '/cite', label: 'Cite this tool' },
+  { href: '/privacy', label: 'Privacy' },
+  { href: '/accessibility', label: 'Accessibility' },
+  { href: '/terms', label: 'Terms' },
+  { href: '/contact', label: 'Contact' },
+];
+---
+<footer class="site-footer">
+  <div class="container">
+    <nav aria-label="Footer">
+      <ul>
+        {links.map((l) => <li><a href={withBase(l.href)}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+    <p>
+      NourishScope version <strong data-testid="version">{TOOL_VERSION}</strong> · Methodology {METHODOLOGY_VERSION}.
+      Free to use. Your data stays in your browser.
+    </p>
+    <p>
+      Code: <a href={`${REPO_URL}/blob/main/LICENSE`}>MIT licence</a>.
+      Content and data: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      <a href={REPO_URL}>Source on GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-7);
+    padding: var(--space-5) 0;
+    background: var(--color-surface-muted);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+  .site-footer ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+  .site-footer a { color: var(--color-text); }
+  .site-footer p { margin-bottom: var(--space-2); }
+</style>
