@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import WorkedExample from '../components/WorkedExample.astro';
 import { METHODOLOGY_VERSION, TOOL_VERSION, UPLOAD_TEMPLATE_PATH, withBase } from '../config/site';
 import { STRATEGY_COPY, TERM_COPY } from '../lib/copy';
 import { STATE_MEDIANS } from '../lib/data/load';
@@ -83,6 +84,8 @@ import { formatPct } from '../lib/format';
       <li><strong>Spend</strong> = households reached × cost. <strong>Unspent</strong> = B − total spend. Version 1.0 reports unspent money; it does not move it to other communities.</li>
       <li><strong>Coverage after</strong> (when households served is entered for every community) = (total served + total reached) ÷ total in need × 100.</li>
     </ul>
+
+    <WorkedExample />
 
     <h2 id="sensitivity">6. Cost sensitivity</h2>
     <p>The tool repeats the allocation and results with every cost multiplied by 0.8 and by 1.2, keeping the budget the same, and shows households reached and unspent for −20%, as entered, and +20%.</p>

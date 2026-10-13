@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  derivedLabel,
   isNotApplicable,
   isSuppressed,
   markerText,
@@ -35,6 +36,18 @@ describe('sourceLabel', () => {
     for (const field of FIELDS.filter((f) => f.public)) {
       expect(sourceLabel(field.key, FIELDS)).toMatch(/^Source: .+, .+$/);
     }
+  });
+});
+
+describe('derivedLabel', () => {
+  it('says the figure was calculated by NourishScope, never a plain source label', () => {
+    expect(derivedLabel('diabetes_pct', 'median', FIELDS)).toBe(
+      'Middle value across Kentucky counties, calculated by NourishScope from CDC PLACES, 2022',
+    );
+    expect(derivedLabel('snap_households', 'total', FIELDS)).toBe(
+      'Total of county figures, calculated by NourishScope from Census ACS 5-year, 2020-2024',
+    );
+    expect(derivedLabel('county_name', 'total', FIELDS)).toBeNull();
   });
 });
 

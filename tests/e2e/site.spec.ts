@@ -70,9 +70,59 @@ test('every internal link and download resolves under the base path', async ({ p
   expect(seen.size).toBeGreaterThan(10);
 });
 
-test('the Home worked example shows the spec figure for Magoffin', async ({ page }) => {
+test('the worked example shows the spec figure for Magoffin on Home and in full on Methodology', async ({ page }) => {
   await page.goto('');
-  await expect(page.locator('.worked-example')).toContainText('$26,427.28');
+  await expect(page.locator('.allocation-preview')).toContainText('Magoffin County');
+  await expect(page.locator('.allocation-preview')).toContainText('$26,427.28');
+  await page.getByRole('link', { name: 'See the full calculation' }).click();
+  await expect(page).toHaveURL(/methodology#worked-example$/);
+  await expect(page.locator('#worked-example')).toContainText('$26,427.28');
+  await expect(page.locator('#worked-example thead').first()).toContainText('Source: CDC PLACES, 2021-2022');
+});
+
+test.describe('Home', () => {
+  test('hero fits the first screen on desktop with the preview beside it', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('');
+    for (const el of [page.locator('#hero-heading'), page.locator('.hero__lead'), page.getByRole('main').getByRole('link', { name: 'Open the app' }),
+      page.getByRole('link', { name: 'Read the methodology' })]) await expect(el).toBeInViewport();
+    const text = await page.locator('.hero__text').boundingBox();
+    const preview = await page.locator('.allocation-preview').boundingBox();
+    expect(preview!.x).toBeGreaterThan(text!.x + text!.width - 1);
+  });
+
+  test('hero subtext is 20 words or fewer', async ({ page }) => {
+    await page.goto('');
+    const words = (await page.locator('.hero__lead').innerText()).trim().split(/\s+/);
+    expect(words.length).toBeLessThanOrEqual(20);
+  });
+
+  test('pillars show three figures, each saying how it was calculated', async ({ page }) => {
+    await page.goto('');
+    const labels = page.locator('.pillar .source-label');
+    await expect(labels).toHaveCount(3);
+    await expect(labels.nth(1)).toHaveText('Middle value across Kentucky counties, calculated by NourishScope from CDC PLACES, 2022');
+    for (const label of await labels.allInnerTexts()) expect(label).toContain('calculated by NourishScope');
+  });
+
+  test('loads no JavaScript', async ({ page }) => {
+    const scripts: string[] = [];
+    page.on('request', (r) => { if (r.resourceType() === 'script') scripts.push(r.url()); });
+    await page.goto('');
+    expect(scripts).toEqual([]);
+  });
+
+  test('on a phone the header is one row with a short app button', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto('');
+    const header = await page.locator('.site-header').boundingBox();
+    expect(header!.height).toBeLessThanOrEqual(80);
+    const app = page.locator('.site-header').getByRole('link', { name: 'Open the app' });
+    await expect(app.locator('.site-header__app-short')).toBeVisible();
+    await expect(app.locator('.site-header__app-long')).toBeHidden();
+    const [brand, menu] = await Promise.all([page.locator('.site-header__brand').boundingBox(), page.locator('.site-header__menu summary').boundingBox()]);
+    expect(Math.abs(brand!.y + brand!.height / 2 - (menu!.y + menu!.height / 2))).toBeLessThan(8);
+  });
 });
 
 test.describe('without JavaScript', () => {
@@ -82,7 +132,7 @@ test.describe('without JavaScript', () => {
     await page.goto('methodology');
     await expect(page.locator('#strategy-proportional')).toBeVisible();
     await page.goto('');
-    await expect(page.locator('.worked-example')).toContainText('$26,427.28');
+    await expect(page.locator('.allocation-preview')).toContainText('$26,427.28');
   });
 });
 

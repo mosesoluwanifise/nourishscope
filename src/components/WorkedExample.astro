@@ -1,29 +1,24 @@
 ---
 /**
- * The spec's worked example, computed by the real engine at build time and
- * shipped as static HTML (plan R17). No JavaScript on the Home page.
+ * The full worked example tables, shipped as static HTML (plan R17).
+ * Shown on Methodology; Home links here. No JavaScript.
  */
-import { HEALTH_MEASURES, prepareCommunities, runStrategy, STRATEGIES } from '../lib/calc';
-import { COUNTIES, FIELDS, STATE_MEDIANS } from '../lib/data/load';
+import { HEALTH_MEASURES } from '../lib/calc';
+import { FIELDS } from '../lib/data/load';
 import { sourceLabel } from '../lib/data/labels';
-import { assembleFromCounties, EXAMPLE_COST } from '../lib/data/merge';
 import { STRATEGY_COPY } from '../lib/copy';
 import { formatCurrency, formatInt } from '../lib/format';
+import {
+  EXAMPLE_BUDGET as BUDGET,
+  EXAMPLE_COST_PER_HOUSEHOLD as COST,
+  examplePrepared as prepared,
+  exampleProportional as proportional,
+  exampleResults as results,
+} from '../lib/worked-example';
 import SourceLabel from './SourceLabel';
 import TableWrap from './TableWrap';
-
-const BUDGET = 50000;
-const COST = EXAMPLE_COST;
-const names = ['Magoffin County', 'Owsley County', 'Wolfe County'];
-const fipsList = names.map((n) => COUNTIES.find((c) => c.county_name === n)!.fips);
-const prepared = prepareCommunities(
-  assembleFromCounties(fipsList, COUNTIES, COST).map((c) => c.input),
-  STATE_MEDIANS,
-);
-const results = STRATEGIES.map((s) => runStrategy(prepared, BUDGET, s));
-const proportional = results[STRATEGIES.indexOf('proportional')];
 ---
-<section class="worked-example" aria-labelledby="example-heading">
+<section class="worked-example" aria-labelledby="example-heading" id="worked-example">
   <h2 id="example-heading">A worked example with real Kentucky data</h2>
   <p>
     Suppose a program has <strong>{formatCurrency(BUDGET)}</strong> to serve three eastern Kentucky counties, all rated

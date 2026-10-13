@@ -49,3 +49,18 @@ export function sourceLabel(key: string | readonly string[], fields: readonly Fi
   const text = sourceAndYears(typeof key === 'string' ? [key] : key, fields);
   return text && `Source: ${text}`;
 }
+
+const DERIVED_HOW = {
+  total: 'Total of county figures',
+  median: 'Middle value across Kentucky counties',
+} as const;
+
+/**
+ * For a figure NourishScope calculates from a field, such as a statewide total or
+ * the middle county value: says so, so it is never read as a number the source publishes.
+ * "Middle value across Kentucky counties, calculated by NourishScope from CDC PLACES, 2022".
+ */
+export function derivedLabel(key: string, how: keyof typeof DERIVED_HOW, fields: readonly FieldInfo[]): string | null {
+  const text = sourceAndYears([key], fields);
+  return text && `${DERIVED_HOW[how]}, calculated by NourishScope from ${text}`;
+}
