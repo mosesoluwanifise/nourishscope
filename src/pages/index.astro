@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WorkedExample from '../components/WorkedExample.astro';
+import { withBase } from '../config/site';
+
+const pillars = [
+  {
+    title: 'Nutrition',
+    text: 'Compare need across communities and test five ways to divide a fixed budget, with households reached and money left over for each.',
+  },
+  {
+    title: 'Community Health',
+    text: 'See diabetes, obesity and high blood pressure for each county beside the plan, and weight the budget by health burden if you choose.',
+  },
+  {
+    title: 'Food System and Agricultural Sustainability',
+    text: 'Check food access, grocery stores, SNAP retailers and farmers markets that accept SNAP before deciding where to work.',
+  },
+];
+---
+<BaseLayout title="NourishScope">
+  <section class="hero" aria-labelledby="hero-heading">
+    <h1 id="hero-heading">Decide where your nutrition program budget will do the most good.</h1>
+    <p class="hero__lead">
+      NourishScope is a free planning tool for Cooperative Extension, EFNEP, public health staff, food banks and funders
+      working in Kentucky. Compare need across all 120 counties, model budget choices, and document the reasoning behind
+      them. No accounts, no specialist software, and your data never leaves your browser.
+    </p>
+    <div class="button-row">
+      <a class="button" href={withBase('/app')}>Open the app</a>
+      <a class="button button--secondary" href={withBase('/methodology')}>Read the methodology</a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pillars-heading">
+    <h2 id="pillars-heading">Three areas in one plan</h2>
+    <ul class="pillars">
+      {pillars.map((p) => (
+        <li>
+          <h3>{p.title}</h3>
+          <p>{p.text}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <WorkedExample />
+
+  <section aria-labelledby="trust-heading">
+    <h2 id="trust-heading">Built to be checked</h2>
+    <p>
+      Every figure in the tool comes from a free federal or Appalachian Regional Commission source and shows its source and
+      year. The formulas are published in the <a href={withBase('/methodology')}>methodology</a>, and the data and code are
+      openly licensed. See <a href={withBase('/data-sources')}>where the data come from</a>.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero { padding: var(--space-5) 0 var(--space-4); max-width: 48rem; }
+  .hero__lead { font-size: 1.15rem; color: var(--color-text-muted); }
+  .button-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .pillars {
+    list-style: none; padding: 0;
+    display: grid; gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+  .pillars li {
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-top: 4px solid var(--color-primary); border-radius: var(--radius);
+    padding: var(--space-4);
+  }
+  .pillars h3 { margin-top: 0; }
+  .pillars p { margin: 0; }
+</style>

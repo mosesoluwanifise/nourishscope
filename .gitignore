@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+
+# Build output generated from the workbook; never edited by hand
+src/generated/
+public/downloads/nourishscope_ky_counties_v1.0.csv
+
+# Test artifacts
+test-results/
+playwright-report/
+coverage/
+
+.DS_Store
+Thumbs.db
+~$*

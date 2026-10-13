@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import App from '../components/app/App';
+import { UPLOAD_TEMPLATE_PATH, withBase } from '../config/site';
+---
+<BaseLayout title="Planning tool" description="Plan where to direct your nutrition program budget across Kentucky communities. Free; your data stays in your browser.">
+  <div class="app-intro">
+    <h1>Plan your program budget</h1>
+    <p>
+      Choose your data, enter your budget and cost, and compare five ways to divide it.
+      Everything is calculated in your browser; nothing you enter is sent anywhere.
+    </p>
+  </div>
+
+  <noscript>
+    <div class="callout callout--warning">
+      <p>
+        The planning tool needs JavaScript, which is turned off in this browser. You can still read{' '}
+        <a href={withBase('/methodology')}>how the calculations work</a>{' '}and download the{' '}
+        <a href={withBase(UPLOAD_TEMPLATE_PATH)}>CSV template</a>.
+      </p>
+    </div>
+  </noscript>
+
+  <div id="app-load-error" class="callout callout--error" role="alert" hidden>
+    <p>
+      The planning tool did not load, possibly because of a weak connection.
+      <button type="button" class="button button--secondary" onclick="location.reload()">Try again</button>
+    </p>
+  </div>
+
+  <App client:only="preact">
+    <p slot="fallback" class="callout app-loading" role="status">Loading the planning tool…</p>
+  </App>
+
+  <script is:inline>
+    // Show a retry message only on an actual failure to load the tool's code, never on a timer.
+    (function () {
+      function failed() {
+        if (document.documentElement.dataset.appReady === 'true') return;
+        var box = document.getElementById('app-load-error');
+        if (box) box.hidden = false;
+        var loading = document.querySelector('.app-loading');
+        if (loading) loading.hidden = true;
+      }
+      window.addEventListener('unhandledrejection', function (e) {
+        var msg = String((e.reason && e.reason.message) || e.reason || '');
+        if (/dynamically imported module|Importing a module script failed|error loading dynamically imported module|Failed to fetch/i.test(msg)) failed();
+      });
+      window.addEventListener('error', function (e) {
+        var t = e.target;
+        if (t && t.tagName === 'SCRIPT') failed();
+      }, true);
+    })();
+  </script>
+</BaseLayout>
