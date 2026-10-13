@@ -18,6 +18,8 @@ import Evaluation from './Evaluation';
 import ExportPanel from './ExportPanel';
 import Inputs from './Inputs';
 import PrintBrief from './PrintBrief';
+import ResultsBar from './ResultsBar';
+import ResultsSummary from './ResultsSummary';
 import {
   EquityPanel,
   FoodModule,
@@ -155,12 +157,14 @@ export default function App() {
             />
           </section>
 
-          <section class="stage stage--results" aria-labelledby="stage-results">
-            <h2 id="stage-results"><span class="stage__number">3</span> Results</h2>
+          <section class="stage stage--results" aria-labelledby="stage-results" id="results">
+            <h2 id="stage-results" tabIndex={-1}><span class="stage__number">3</span> Results</h2>
             {derived.emptyMessage ? (
               <p class="callout empty-state">{derived.emptyMessage}</p>
             ) : (
               <>
+                <ResultsSummary result={selected!} needOnly={derived.needOnly} strategy={state.strategy}
+                  setStrategy={(strategy: Strategy) => update({ strategy })} />
                 <nav aria-label="Results sections" class="section-nav">
                   <ul>{SECTIONS.map(([id, label]) => <li key={id}><a href={`#${id}`}>{label}</a></li>)}</ul>
                 </nav>
@@ -182,6 +186,7 @@ export default function App() {
 
         {/* Same tree position before and after a source is chosen, so entries are never lost. */}
         <Evaluation />
+        {selected && <ResultsBar targetId="results" headingId="stage-results" strategy={state.strategy} reached={selected.totals.reached} />}
       </div>
       {brief && <PrintBrief brief={brief} visible={previewOpen} />}
     </div>

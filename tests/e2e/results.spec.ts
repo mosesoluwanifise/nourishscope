@@ -69,3 +69,55 @@ test('re-uploading a corrected file with the same name is read again', async ({ 
   });
   await expect(page.locator('#upload-summary')).toHaveText('1 of 1 rows matched a Kentucky county');
 });
+
+test('the summary names the strategy and its picker changes the whole results area', async ({ page }) => {
+  await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+  const summary = page.locator('.results-summary');
+  await expect(summary.getByRole('heading')).toHaveText('Summary: Share by unmet need');
+  await expect(summary).toContainText('Most: Magoffin County gets $26,427.28');
+  await page.getByLabel('Strategy', { exact: true }).selectOption({ label: 'Equal split' });
+  await expect(summary.getByRole('heading')).toHaveText('Summary: Equal split');
+  await expect(summary).toContainText('All 3 communities get $16,666.67');
+  await expect(page.locator('#module-nutrition').locator('..')).toContainText('Showing Equal split');
+});
+
+test.describe('results bar on a phone', () => {
+  test.use({ viewport: { width: 375, height: 667 } });
+
+  test('appears while results are below, jumps to them, and hides once there', async ({ page }) => {
+    await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+    await page.getByLabel('Total budget').scrollIntoViewIfNeeded();
+    const bar = page.locator('.results-bar');
+    await expect(bar).toBeVisible();
+    await expect(bar).toContainText('Share by unmet need: 499 households reached.');
+    await bar.getByRole('link', { name: 'See results' }).click();
+    await expect(page.locator('#stage-results')).toBeFocused();
+    await expect(bar).toBeHidden();
+    await page.locator('#module-nutrition').scrollIntoViewIfNeeded();
+    await expect(bar).toBeHidden();
+  });
+
+  test('keeps a focused field clear of the bar', async ({ page }) => {
+    await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+    await page.getByLabel('Total budget').scrollIntoViewIfNeeded();
+    await expect(page.locator('.results-bar')).toBeVisible();
+    await page.getByLabel('Total budget').focus();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    const focused = await page.evaluate(() => document.activeElement!.getBoundingClientRect().bottom);
+    const barTop = await page.locator('.results-bar').evaluate((el) => el.getBoundingClientRect().top);
+    expect(focused).toBeLessThanOrEqual(barTop);
+  });
+
+  test('is not shown without results', async ({ page }) => {
+    await selectCounties(page, ['Magoffin County'], '');
+    await expect(page.locator('.results-bar')).toHaveCount(0);
+  });
+});
+
+test('the results bar never shows on a wide screen', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(page.locator('.results-bar')).toHaveCount(0);
+});

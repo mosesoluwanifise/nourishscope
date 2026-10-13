@@ -207,7 +207,10 @@ export function StrategyComparison({ derived, strategy, setStrategy }: Props) {
   return (
     <section aria-labelledby="compare-heading" class="module" id="compare">
       <h3 id="compare-heading" tabIndex={-1}>Compare strategies</h3>
-      <p>The same budget, divided five ways. Choose one to see it community by community in the planning table.</p>
+      <p>
+        The same budget, divided five ways. Choose one to see it community by community in the planning table. You can
+        also change it in the <a href="#summary">summary</a>.
+      </p>
       <fieldset class="strategy-choice">
         <legend>Show in the planning table and brief</legend>
         {STRATEGIES.map((s) => (
