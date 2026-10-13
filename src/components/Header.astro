@@ -133,8 +133,13 @@ const isCurrent = (href: string) => current === withBase(href).replace(/\/$/, ''
     .site-header__menu ul { flex-direction: column; padding: var(--space-3) 0; gap: var(--space-2); }
     .site-header__menu a { display: block; padding: var(--space-2) 0; }
   }
-  /* Brand, theme switch, App and Menu must share one row at 375px, so Menu becomes an icon. */
+  /*
+   * Brand, theme switch, App and Menu must share one row at 375px, even with a wide system
+   * font such as DejaVu Sans: Menu becomes an icon, and the brand and App button tighten.
+   */
   @media (max-width: 26.25rem) {
+    .site-header__brand { font-size: 1.05rem; }
+    .site-header__app { padding: var(--space-1) var(--space-3); }
     .site-header__menu summary { justify-content: center; min-width: 44px; padding: 0; }
     .site-header__menu-icon { display: block; }
     .site-header__menu-label {
