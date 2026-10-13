@@ -1,6 +1,7 @@
 /**
- * The /app planning tool (plan U5–U7): one page, three stages.
+ * The /app planning tool: one page, three stages, revealed one at a time.
  *   1. Your data   2. Your program   3. Results
+ * Stages 2 and 3 appear once a data source is chosen. Evaluation stays available throughout.
  */
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import sampleCsv from '../../../data/sample/nourishscope_sample_communities.csv?raw';
@@ -38,8 +39,8 @@ const SECTIONS = [
   ['compare', 'Compare strategies'],
   ['sensitivity', 'Cost sensitivity'],
   ['equity', 'Equity'],
-  ['evaluation', 'Evaluation'],
   ['export', 'Save or export'],
+  ['evaluation', 'Evaluation'],
 ] as const;
 
 function currentSourceLabel(state: PlanState): string | null {
@@ -76,7 +77,9 @@ export default function App() {
   const selected = derived.results?.find((r) => r.strategy === state.strategy);
   const summary = selected
     ? `Results updated: ${formatInt(selected.totals.reached)} households reached, ${formatCurrency(selected.totals.unspent)} unspent, using ${STRATEGY_COPY[state.strategy].name}.`
-    : derived.emptyMessage ?? '';
+    : state.source
+      ? `Your program section is shown. ${derived.emptyMessage ?? ''}`
+      : '';
   const timer = useRef<number>();
   useEffect(() => {
     window.clearTimeout(timer.current);
@@ -127,15 +130,15 @@ export default function App() {
               Results and exports are labelled as sample data.
             </p>
           )}
+          <p class="evaluation-link"><a href="#evaluation">Already ran a program? Evaluate your results</a></p>
         </section>
 
+        <div class="visually-hidden" aria-live="polite" aria-atomic="true">{announcement}</div>
+
+        {state.source && (
         <div class="planner__body">
           <section class="stage stage--inputs" aria-labelledby="stage-program" id="your-program">
             <h2 id="stage-program"><span class="stage__number">2</span> Your program</h2>
-            {state.source === 'kentucky' && (
-              <CountySelector selected={state.selectedFips}
-                onChange={(next) => setState((s) => ({ ...s, selectedFips: next(s.selectedFips) }))} />
-            )}
             <Inputs
               state={state}
               derived={derived}
@@ -145,12 +148,15 @@ export default function App() {
               setFloor={(floorPctText) => update({ floorPctText })}
               setNeed={(id, v) => setState((s) => ({ ...s, needText: { ...s.needText, [id]: v } }))}
               setServed={(id, v) => setState((s) => ({ ...s, servedText: { ...s.servedText, [id]: v } }))}
+              counties={state.source === 'kentucky' && (
+                <CountySelector selected={state.selectedFips}
+                  onChange={(next) => setState((s) => ({ ...s, selectedFips: next(s.selectedFips) }))} />
+              )}
             />
           </section>
 
           <section class="stage stage--results" aria-labelledby="stage-results">
             <h2 id="stage-results"><span class="stage__number">3</span> Results</h2>
-            <div class="visually-hidden" aria-live="polite" aria-atomic="true">{announcement}</div>
             {derived.emptyMessage ? (
               <p class="callout empty-state">{derived.emptyMessage}</p>
             ) : (
@@ -168,11 +174,14 @@ export default function App() {
                 <EquityPanel derived={derived} strategy={state.strategy} />
               </>
             )}
-            <Evaluation />
             <ExportPanel brief={brief} costConfirmed={derived.costConfirmed}
               previewOpen={previewOpen} setPreviewOpen={setPreviewOpen} />
           </section>
         </div>
+        )}
+
+        {/* Same tree position before and after a source is chosen, so entries are never lost. */}
+        <Evaluation />
       </div>
       {brief && <PrintBrief brief={brief} visible={previewOpen} />}
     </div>

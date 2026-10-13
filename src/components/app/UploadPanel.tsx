@@ -84,6 +84,7 @@ export default function UploadPanel({ upload, communities, flagged, onUpload, on
         <p id="upload-file-hint" class="field__hint">
           Use the <a href={withBase(UPLOAD_TEMPLATE_PATH)} download>template</a>: one row per community,
           with its county or FIPS code and the number of households in need. Files up to 1 MB.
+          Upload program totals by community only. Do not include names, addresses or other personal details.
         </p>
         <input id="upload-file" type="file" accept=".csv,text/csv" aria-describedby="upload-file-hint" onChange={onFile} />
       </div>

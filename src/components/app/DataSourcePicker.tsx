@@ -1,4 +1,3 @@
-import { UPLOAD_TEMPLATE_PATH, withBase } from '../../config/site';
 import type { DataSource } from '../../lib/data/merge';
 
 interface Props {
@@ -53,10 +52,6 @@ export default function DataSourcePicker({ source, onChoose }: Props) {
           </label>
         ))}
       </div>
-      <p class="field__hint">
-        Uploading? <a href={withBase(UPLOAD_TEMPLATE_PATH)} download>Download the CSV template</a>.
-        Upload program totals by community only. Do not include names, addresses or other personal details.
-      </p>
     </fieldset>
   );
 }

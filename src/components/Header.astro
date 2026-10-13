@@ -22,7 +22,7 @@ const isCurrent = (href: string) => current === withBase(href).replace(/\/$/, ''
         ))}
       </ul>
     </nav>
-    <a class="button site-header__app" href={withBase('/app')} aria-current={isCurrent('/app') ? 'page' : undefined}>Open the app</a>
+    {!isCurrent('/app') && <a class="button site-header__app" href={withBase('/app')}>Open the app</a>}
     <details class="site-header__menu">
       <summary>Menu</summary>
       <nav aria-label="Main (menu)">

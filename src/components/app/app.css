@@ -9,10 +9,12 @@
   background: var(--color-primary-fill); color: var(--color-on-primary); font-size: 1rem; flex-shrink: 0;
 }
 .current-source { margin-bottom: var(--space-3); }
+.evaluation-link a { display: inline-flex; align-items: center; min-height: 44px; }
 
 @media (min-width: 64rem) {
   .planner__body { display: grid; grid-template-columns: 22rem minmax(0, 1fr); gap: var(--space-6); align-items: start; }
-  .stage--inputs { position: sticky; top: var(--space-4); max-height: calc(100vh - 2rem); overflow-y: auto; padding-right: var(--space-2); }
+  /* Pinned only while short enough to fit: an open county list or disclosure scrolls with the page instead. */
+  .stage--inputs:not(:has(.county-list, details[open])) { position: sticky; top: var(--space-4); }
   .change-inputs { display: none; }
 }
 
@@ -63,6 +65,11 @@ legend { font-weight: 700; font-size: 1.1rem; margin-bottom: var(--space-3); pad
 .button:disabled { opacity: 0.6; cursor: not-allowed; }
 .button-row { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-3); }
 
+.county-selector__header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-2); }
+.county-selector__count { margin: 0; font-weight: 600; }
+.county-summary { margin-bottom: var(--space-5); }
+.county-summary__heading { font-size: 1.1rem; margin: 0 0 var(--space-2); }
+.county-summary p { margin-bottom: var(--space-2); }
 .county-selector__tools { display: grid; gap: var(--space-1); margin-bottom: var(--space-3); }
 .county-selector__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .county-list {
@@ -76,7 +83,12 @@ legend { font-weight: 700; font-size: 1.1rem; margin-bottom: var(--space-3); pad
 }
 
 .community-inputs { margin-bottom: var(--space-4); }
-.community-inputs summary { font-weight: 600; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.more-options { margin-bottom: var(--space-4); }
+.more-options > .field { margin-top: var(--space-2); }
+.community-inputs summary, .more-options summary { font-weight: 600; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+/* display:flex drops the native disclosure triangle, so draw one. */
+.community-inputs summary::before, .more-options summary::before { content: '▸'; margin-right: var(--space-2); }
+.community-inputs[open] > summary::before, .more-options[open] > summary::before { content: '▾'; }
 
 .upload-panel { margin-top: var(--space-4); }
 .flagged-list { list-style: none; padding: 0; }

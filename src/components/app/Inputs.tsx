@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { TERM_COPY } from '../../lib/copy';
 import { formatInt } from '../../lib/format';
 import { NOT_ENTERED_TEXT } from '../../lib/data/labels';
@@ -14,9 +15,11 @@ interface Props {
   setFloor: (v: string) => void;
   setNeed: (id: string, v: string) => void;
   setServed: (id: string, v: string) => void;
+  /** The county selector, placed after budget and cost (Kentucky data only). */
+  counties?: ComponentChildren;
 }
 
-export default function Inputs({ state, derived, setBudget, setCost, setCostConfirmed, setFloor, setNeed, setServed }: Props) {
+export default function Inputs({ state, derived, setBudget, setCost, setCostConfirmed, setFloor, setNeed, setServed, counties }: Props) {
   const { errors, warnings, communities } = derived;
   const editable = state.source === 'kentucky';
   const { costFromUploadForAll } = derived;
@@ -42,8 +45,7 @@ export default function Inputs({ state, derived, setBudget, setCost, setCostConf
         )}
       </div>
 
-      <Field id="floor" label={TERM_COPY.floorShare.name} suffix="%" value={state.floorPctText} onInput={setFloor}
-        hint={TERM_COPY.floorShare.explain} error={errors.floor} />
+      {counties}
 
       {communities.length > 0 && (
         <details class="community-inputs">
@@ -96,6 +98,12 @@ export default function Inputs({ state, derived, setBudget, setCost, setCostConf
           </TableWrap>
         </details>
       )}
+
+      <details class="more-options">
+        <summary>More options</summary>
+        <Field id="floor" label={TERM_COPY.floorShare.name} suffix="%" value={state.floorPctText} onInput={setFloor}
+          hint={TERM_COPY.floorShare.explain} error={errors.floor} />
+      </details>
     </div>
   );
 }
