@@ -126,6 +126,9 @@ const isCurrent = (href: string) => current === withBase(href).replace(/\/$/, ''
     cursor: pointer;
   }
   @media (max-width: 760px) {
+    /* Phones keep the header (and its Menu) pinned while scrolling. Anchor jumps clear it
+       through scroll-padding-top in global.css. Printing hides the header (app.css). */
+    .site-header { position: sticky; top: 0; z-index: 40; }
     .site-header__nav { display: none; }
     .site-header__menu { display: block; }
     .site-header__menu[open] { flex-basis: 100%; order: 3; }

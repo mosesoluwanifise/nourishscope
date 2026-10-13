@@ -75,6 +75,11 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; }
+/* Matches the pinned phone header in Header.astro, so anchor jumps and focused fields are not
+   hidden under it. */
+@media (max-width: 760px) {
+  html { scroll-padding-top: 5rem; }
+}
 
 body {
   margin: 0;
