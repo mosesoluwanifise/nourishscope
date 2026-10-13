@@ -1,0 +1,21 @@
+NourishScope content and data licence
+
+Copyright (c) 2026 Yetunde Khadijat Olaogun
+
+Unless otherwise noted, the written content of this site (everything under
+src/pages/ and src/content/), the methodology, and the compiled dataset
+(data/NourishScope_Kentucky_County_Dataset_v1.0.xlsx and files generated from
+it) are licensed under the Creative Commons Attribution 4.0 International
+licence (CC BY 4.0).
+
+You may share and adapt this material for any purpose, including commercially,
+as long as you give appropriate credit, provide a link to the licence, and
+indicate if changes were made.
+
+Full licence text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+The underlying public data come from U.S. federal sources (Census Bureau, CDC,
+USDA ERS) and the Appalachian Regional Commission. Their own terms of use
+continue to apply to the original source data.
+
+Source code is licensed separately under the MIT licence (see LICENSE).
