@@ -1,0 +1,66 @@
+import AxeBuilder from '@axe-core/playwright';
+import { expect, test, type Page } from '@playwright/test';
+
+const PAGES = ['', 'app', 'methodology', 'data-sources', 'about', 'research', 'changelog', 'cite', 'privacy', 'accessibility', 'terms', 'contact'];
+
+async function axe(page: Page) {
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  return results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
+}
+
+async function workedExample(page: Page) {
+  await page.goto('app');
+  await page.getByLabel('Kentucky county data').check();
+  for (const name of ['Magoffin County', 'Owsley County', 'Wolfe County']) {
+    await page.getByRole('checkbox', { name: new RegExp(`^${name}`) }).check();
+  }
+  await page.getByLabel('Total budget').fill('50000');
+}
+
+test.describe('dark mode', () => {
+  test.use({ colorScheme: 'dark' });
+
+  for (const path of PAGES) {
+    test(`/${path} has no axe violations`, async ({ page }) => {
+      await page.goto(path);
+      expect(await axe(page)).toEqual([]);
+    });
+  }
+
+  test('/app with results has no axe violations', async ({ page }) => {
+    await workedExample(page);
+    await expect(page.locator('#module-nutrition')).toBeVisible();
+    expect(await axe(page)).toEqual([]);
+  });
+
+  test('printing still uses the light colours', async ({ page }) => {
+    await page.goto('');
+    const screenBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    await page.emulateMedia({ media: 'print', colorScheme: 'dark' });
+    const printBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(screenBg).not.toBe(printBg);
+    expect(printBg).toBe('rgb(246, 247, 245)');
+  });
+});
+
+test.describe('phone sizing', () => {
+  test.use({ viewport: { width: 375, height: 800 } });
+
+  test('stand-alone nav links are at least 44px tall', async ({ page }) => {
+    await workedExample(page);
+    const heights = await page.$$eval('.section-nav a, .site-footer nav a', (as) =>
+      as.map((a) => [a.textContent, a.getBoundingClientRect().height] as const),
+    );
+    expect(heights.length).toBeGreaterThan(6);
+    for (const [label, h] of heights) expect(h, label ?? '').toBeGreaterThanOrEqual(44);
+  });
+
+  test('labels, hints and badges are at least 14px', async ({ page }) => {
+    await workedExample(page);
+    const sizes = await page.$$eval('.source-label, .field__hint, .field__warning, .badge, caption', (els) =>
+      els.map((el) => [el.className || el.tagName, parseFloat(getComputedStyle(el).fontSize)] as const),
+    );
+    expect(sizes.length).toBeGreaterThan(5);
+    for (const [name, px] of sizes) expect(px, String(name)).toBeGreaterThanOrEqual(14);
+  });
+});
