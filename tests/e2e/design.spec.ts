@@ -56,3 +56,54 @@ test.describe('phone sizing', () => {
     for (const [name, px] of sizes) expect(px, String(name)).toBeGreaterThanOrEqual(14);
   });
 });
+
+test.describe('theme switch', () => {
+  test('switches to dark, is remembered on the next page, and switches back', async ({ page }) => {
+    await page.goto('about');
+    const root = page.locator('html');
+    const toggle = page.getByRole('button', { name: 'Dark mode' });
+    await expect(root).toHaveAttribute('data-theme', 'light');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+
+    await toggle.click();
+    await expect(root).toHaveAttribute('data-theme', 'dark');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+
+    await page.goto('methodology');
+    await expect(root).toHaveAttribute('data-theme', 'dark');
+    await page.getByRole('button', { name: 'Dark mode' }).click();
+    await expect(root).toHaveAttribute('data-theme', 'light');
+  });
+
+  test.describe('on a dark device', () => {
+    test.use({ colorScheme: 'dark' });
+    test('starts dark and can be switched to light', async ({ page }) => {
+      await page.goto('');
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+      await page.getByRole('button', { name: 'Dark mode' }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    });
+  });
+});
+
+test.describe('document layout', () => {
+  test('on a wide screen the Methodology contents sit on the left of the text', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('methodology');
+    const toc = (await page.getByRole('navigation', { name: 'On this page' }).boundingBox())!;
+    const body = (await page.locator('.doc__body').boundingBox())!;
+    expect(toc.x + toc.width).toBeLessThan(body.x);
+    // The pair is centred: the space either side differs by less than one gutter.
+    const left = toc.x;
+    const right = 1280 - (body.x + body.width);
+    expect(Math.abs(left - right)).toBeLessThan(48);
+  });
+
+  test('the About profile card sits on the left of the text on a wide screen', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('about');
+    const card = (await page.locator('.profile-card').boundingBox())!;
+    const body = (await page.locator('.doc__body').boundingBox())!;
+    expect(card.x + card.width).toBeLessThan(body.x);
+  });
+});

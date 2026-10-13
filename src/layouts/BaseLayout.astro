@@ -21,6 +21,34 @@ const fullTitle = title === SITE_NAME ? SITE_NAME : `${title} | ${SITE_NAME}`;
     <meta name="referrer" content="no-referrer" />
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <title>{fullTitle}</title>
+    {/* Inline, so it runs before first paint and adds no script request. The saved choice wins,
+        otherwise the device setting decides, and keeps deciding if it changes. */}
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        var device = matchMedia('(prefers-color-scheme: dark)');
+        function saved() { try { return localStorage.getItem('theme'); } catch (e) { return null; } }
+        function set(theme) {
+          root.dataset.theme = theme;
+          var button = document.querySelector('[data-theme-toggle]');
+          if (button) button.setAttribute('aria-pressed', String(theme === 'dark'));
+        }
+        function fromDevice() { return device.matches ? 'dark' : 'light'; }
+        set(saved() || fromDevice());
+        device.addEventListener('change', function () { if (!saved()) set(fromDevice()); });
+        document.addEventListener('DOMContentLoaded', function () {
+          var button = document.querySelector('[data-theme-toggle]');
+          if (!button) return;
+          button.hidden = false;
+          set(root.dataset.theme);
+          button.addEventListener('click', function () {
+            var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+            try { localStorage.setItem('theme', next); } catch (e) { /* not saved, still switches for this page */ }
+            set(next);
+          });
+        });
+      })();
+    </script>
     <slot name="head" />
   </head>
   <body>

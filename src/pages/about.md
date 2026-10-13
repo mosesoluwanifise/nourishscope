@@ -2,13 +2,17 @@
 layout: ../layouts/ProseLayout.astro
 title: About the Founder
 description: Yetunde Khadijat Olaogun, founder and lead designer of NourishScope.
+profile:
+  photo: /images/founder.jpg
+  alt: Portrait of Yetunde Khadijat Olaogun
+  name: Yetunde Khadijat Olaogun
+  role: Founder and lead designer, NourishScope. Graduate Research Assistant, University of Kentucky.
+  email: Yetunde.Olaogun@uky.edu
 ---
 
 # About the Founder
 
 ## Built by a researcher who has spent her career turning program data into better decisions.
-
-![Portrait of Yetunde Khadijat Olaogun](/images/founder.jpg)
 
 Yetunde Khadijat Olaogun is the founder and lead designer of NourishScope. She is a Graduate Research Assistant in the Department of Community and Leadership Development at the University of Kentucky, where her work brings together nutrition, agriculture, data analytics, and program evaluation. She holds an MBA from Colorado State University and a Bachelor of Technology in Animal Nutrition and Biotechnology (First Class) from Ladoke Akintola University of Technology, Nigeria.
 
