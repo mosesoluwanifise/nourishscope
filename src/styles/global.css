@@ -42,9 +42,13 @@
   --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
 }
 
-/* Dark mode follows the device. `screen` keeps printing on the light tokens. */
-@media screen and (prefers-color-scheme: dark) {
-  :root {
+/*
+ * Dark mode. A small inline script in BaseLayout sets data-theme on <html> before the page
+ * paints: the visitor's saved choice from the header switch, otherwise the device setting.
+ * `screen` keeps printing on the light tokens.
+ */
+@media screen {
+  :root[data-theme='dark'] {
     color-scheme: dark;
     --color-bg: #121614;
     --color-surface: #1a1f1c;
@@ -190,6 +194,84 @@ tbody tr:last-child td { border-bottom: 0; }
 @media (min-width: 40rem) {
   .prose p:has(> img:only-child) { float: right; margin: 0 0 var(--space-4) var(--space-5); }
 }
+
+/*
+ * Document pages (Methodology, About and the Markdown pages). The reading column is centred.
+ * A page can add a side column (a contents list, a profile card): on wide screens it sits on
+ * the left beside the text, and on narrow screens it sits between the title and the text.
+ */
+.doc { max-width: var(--prose-width); margin-inline: auto; }
+/* minmax(0, 1fr): a wide table inside the text must scroll in its own wrapper, not widen the page. */
+.doc--aside { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'head' 'aside' 'body'; }
+.doc__head { grid-area: head; }
+.doc__aside { grid-area: aside; margin-bottom: var(--space-5); }
+.doc__body { grid-area: body; }
+@media (min-width: 64rem) {
+  .doc--aside {
+    max-width: none;
+    grid-template-columns: 15rem minmax(0, var(--prose-width));
+    grid-template-areas: 'aside head' 'aside body';
+    column-gap: var(--space-7);
+    justify-content: center;
+  }
+  .doc__aside { align-self: start; position: sticky; top: var(--space-5); margin-top: var(--space-6); }
+}
+
+/* "On this page" contents list */
+.doc-toc__title {
+  margin: 0 0 var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.doc-toc ul { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--color-border); }
+.doc-toc a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-3);
+  margin-left: -2px;
+  border-left: 2px solid transparent;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  line-height: 1.35;
+}
+.doc-toc a:hover { color: var(--color-link); border-left-color: var(--color-link); }
+@media (min-width: 64rem) {
+  .doc-toc a { min-height: 0; font-size: 0.9375rem; }
+}
+
+/* Profile card (About) */
+.profile-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  max-width: 17rem;
+}
+.profile-card img { display: block; width: 100%; max-width: 15rem; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); }
+.profile-card__name { margin: var(--space-3) 0 var(--space-1); font-weight: 700; font-size: 1.1rem; line-height: 1.3; }
+.profile-card__role { margin: 0; color: var(--color-text-muted); font-size: 0.9375rem; line-height: 1.45; }
+.profile-card__email { margin: var(--space-3) 0 0; font-size: 0.9375rem; overflow-wrap: anywhere; }
+/* Below the two-column width the card is a compact row: small photo beside the details. */
+@media (max-width: 63.99rem) {
+  .profile-card {
+    max-width: none;
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    column-gap: var(--space-4);
+    align-items: start;
+  }
+  .profile-card img { grid-row: span 3; }
+  .profile-card__name { margin-top: 0; }
+  .profile-card__email { margin-top: var(--space-2); }
+}
+
+/* Definition lists in long documents (Methodology inputs) */
+.prose dt { font-weight: 700; margin-top: var(--space-4); }
+.prose dd { margin: var(--space-1) 0 0; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }

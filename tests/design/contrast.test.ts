@@ -12,7 +12,7 @@ function tokensIn(block: string): Record<string, string> {
 }
 
 const light = tokensIn(css.match(/:root\s*\{([^}]*)\}/)![1]);
-const darkBlock = css.match(/prefers-color-scheme:\s*dark\)\s*\{\s*:root\s*\{([^}]*)\}/);
+const darkBlock = css.match(/:root\[data-theme='dark'\]\s*\{([^}]*)\}/);
 const dark = { ...light, ...tokensIn(darkBlock![1]) };
 
 function luminance(hex: string): number {

@@ -118,6 +118,8 @@ test.describe('Home', () => {
     await expect(app.locator('.site-header__app-long')).toBeHidden();
     const [brand, menu] = await Promise.all([page.locator('.site-header__brand').boundingBox(), page.locator('.site-header__menu summary').boundingBox()]);
     expect(Math.abs(brand!.y + brand!.height / 2 - (menu!.y + menu!.height / 2))).toBeLessThan(8);
+    const theme = await page.getByRole('button', { name: 'Dark mode' }).boundingBox();
+    expect(Math.abs(brand!.y + brand!.height / 2 - (theme!.y + theme!.height / 2))).toBeLessThan(8);
   });
 });
 

@@ -1,18 +1,43 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { withBase } from '../config/site';
 import { prefixRootLinks } from '../lib/links';
 
+/** Optional person card shown beside the text (the About page). Edited in the page's frontmatter. */
+interface Profile {
+  photo: string;
+  alt: string;
+  name: string;
+  role: string;
+  email?: string;
+}
+
 interface Props {
-  frontmatter: { title: string; description?: string };
+  frontmatter: { title: string; description?: string; profile?: Profile };
 }
 
 const { frontmatter } = Astro.props;
+const { profile } = frontmatter;
 // Markdown authors write "/app" or "/images/x.jpg"; add the deploy base path so
 // those links work on GitHub Pages (plan: every internal link goes through the base).
 const html = prefixRootLinks(await Astro.slots.render('default'), import.meta.env.BASE_URL);
 ---
 <BaseLayout title={frontmatter.title} description={frontmatter.description}>
-  <article class="prose">
-    <Fragment set:html={html} />
-  </article>
+  {profile ? (
+    <div class="doc doc--aside">
+      <aside class="doc__aside profile-card" aria-label={profile.name}>
+        <img src={withBase(profile.photo)} alt={profile.alt} width="240" height="240" />
+        <p class="profile-card__name">{profile.name}</p>
+        <p class="profile-card__role">{profile.role}</p>
+        {profile.email && <p class="profile-card__email"><a href={`mailto:${profile.email}`}>{profile.email}</a></p>}
+      </aside>
+      <article class="doc__body prose">
+        <Fragment set:html={html} />
+      </article>
+    </div>
+  ) : (
+    <article class="doc prose">
+      <Fragment set:html={html} />
+    </article>
+  )}
 </BaseLayout>

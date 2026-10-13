@@ -7,15 +7,18 @@ import { STATE_MEDIANS } from '../lib/data/load';
 import { formatPct } from '../lib/format';
 ---
 <BaseLayout title="Methodology" description="How NourishScope turns public data and your inputs into budget allocations: formulas, defaults, assumptions and limitations.">
-  <article class="prose">
-    <h1>Methodology</h1>
-    <p>
-      This page explains every calculation in NourishScope, version {TOOL_VERSION}, Methodology {METHODOLOGY_VERSION}.
-      It follows the NourishScope Calculation Specification written by the founder, Yetunde Khadijat Olaogun.
-      All calculations run in your browser.
-    </p>
+  <article class="doc doc--aside">
+    <header class="doc__head prose">
+      <h1>Methodology</h1>
+      <p>
+        This page explains every calculation in NourishScope, version {TOOL_VERSION}, Methodology {METHODOLOGY_VERSION}.
+        It follows the NourishScope Calculation Specification written by the founder, Yetunde Khadijat Olaogun.
+        All calculations run in your browser.
+      </p>
+    </header>
 
-    <nav aria-label="On this page">
+    <nav class="doc__aside doc-toc" aria-label="On this page">
+      <p class="doc-toc__title" aria-hidden="true">On this page</p>
       <ul>
         <li><a href="#data">1. Data the tool combines</a></li>
         <li><a href="#inputs">2. Inputs and defaults</a></li>
@@ -30,6 +33,7 @@ import { formatPct } from '../lib/format';
       </ul>
     </nav>
 
+    <div class="doc__body prose">
     <h2 id="data">1. Data the tool combines</h2>
     <ul>
       <li><strong>Kentucky public data (default).</strong> All 120 counties, compiled from the U.S. Census Bureau, CDC PLACES, the USDA Economic Research Service Food Environment Atlas and the Appalachian Regional Commission. See <a href={withBase('/data-sources')}>Data Sources</a>.</li>
@@ -121,5 +125,6 @@ import { formatPct } from '../lib/format';
       <li>USDA does not report grocery stores per 1,000 residents for 42 small counties; the tool shows “Not reported (suppressed by source)” for those, never zero.</li>
       <li>Results support a decision; they do not replace local knowledge of your communities.</li>
     </ul>
+    </div>
   </article>
 </BaseLayout>

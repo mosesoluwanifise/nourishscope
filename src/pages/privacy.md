@@ -9,7 +9,7 @@ description: NourishScope keeps your data in your browser. No accounts, cookies 
 **Your data stays in your browser.** Everything you upload or type into the planning tool, including program figures and evaluation results, is processed on your own device. It is never sent to NourishScope or anyone else.
 
 - No accounts or sign-in.
-- No cookies.
+- No cookies. If you use the light or dark switch, your choice is saved in your own browser so the next page matches. It is never sent anywhere.
 - No analytics or tracking.
 - No fonts, scripts or images loaded from other websites.
 - Your work is not saved. If you close or reload the page, it is gone, so save your planning brief as a PDF or CSV first.
