@@ -95,7 +95,7 @@ export interface Derived {
 }
 
 const NEED_DEFINITIONS: Record<NeedSource, string> = {
-  snap: 'SNAP households (U.S. Census Bureau, ACS 5-year 2020–2024)',
+  snap: 'SNAP households (U.S. Census Bureau, ACS 5-year 2020-2024)',
   user: 'Your own figures',
   upload: 'Number of households in need from your file',
   sample: 'Fictional figures from the sample data',

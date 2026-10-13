@@ -151,7 +151,7 @@ export default function UploadPanel({ upload, communities, flagged, onUpload, on
               <h4 id="matched-heading" tabIndex={-1} ref={matchedRef}>Matched communities</h4>
               <ul class="matched-list">
                 {communities.map((c) => (
-                  <li key={c.input.id}>{c.input.name} — {c.county.county_name}</li>
+                  <li key={c.input.id}>{c.input.name}, {c.county.county_name}</li>
                 ))}
               </ul>
             </>

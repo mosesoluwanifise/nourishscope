@@ -2,13 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import DataSourcesTable from '../components/DataSourcesTable.astro';
 import { withBase } from '../config/site';
+import { NOT_APPLICABLE_TEXT } from '../lib/data/labels';
 
 const LAST_UPDATED = 'October 2026 (dataset v1.0)';
 const sources = [
   {
-    name: 'American Community Survey (ACS) 5-Year Estimates, 2020–2024',
+    name: 'American Community Survey (ACS) 5-Year Estimates, 2020-2024',
     publisher: 'U.S. Census Bureau',
-    year: '2020–2024',
+    year: '2020-2024',
     fields: 'Population (B01003), total households (B11001), households receiving SNAP and their share (B22003).',
     link: 'https://data.census.gov/table/ACSDT5Y2024.B22003?g=040XX00US21$0500000',
   },
@@ -22,8 +23,8 @@ const sources = [
   {
     name: 'Food Environment Atlas, 2025 data download',
     publisher: 'U.S. Department of Agriculture, Economic Research Service (USDA ERS)',
-    year: '2018–2023 (varies by field)',
-    fields: 'Low income and low access to a store (2019), grocery stores per 1,000 residents (2020), SNAP-authorized stores (2023), farmers markets and those accepting SNAP (2018), poverty, child poverty, persistent poverty and median household income (2021), and metro or nonmetro status (2023). Grocery stores per 1,000 is withheld by USDA for 42 small counties; NourishScope shows these as “Not reported (suppressed by source)”, not zero.',
+    year: '2017-2023 (varies by field)',
+    fields: 'Low income and low access to a store (2019), grocery stores per 1,000 residents (2020), SNAP-authorized stores (2023), farmers markets and those accepting SNAP (2018), poverty, child poverty and median household income (2021), persistent poverty (2017-2021), and metro or nonmetro status (2023). Grocery stores per 1,000 is withheld by USDA for 42 small counties; NourishScope shows these as “Not reported (suppressed by source)”, not zero.',
     link: 'https://www.ers.usda.gov/data-products/food-environment-atlas/',
   },
   {
@@ -36,7 +37,7 @@ const sources = [
   {
     name: 'County FIPS codes',
     publisher: 'U.S. Census Bureau',
-    year: '—',
+    year: NOT_APPLICABLE_TEXT,
     fields: 'County name, five-digit FIPS code and state, used to join all the sources.',
     link: 'https://www.census.gov/library/reference/code-lists/ansi.html',
   },

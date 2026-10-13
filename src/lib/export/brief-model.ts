@@ -8,6 +8,7 @@ import { STRATEGY_COPY } from '../copy';
 import { METHODOLOGY_VERSION, TOOL_VERSION } from '../../config/site';
 import { roundHalfEven } from '../calc/rounding';
 import { FIELDS, STATE_MEDIANS } from '../data/load';
+import { NOT_APPLICABLE_TEXT } from '../data/labels';
 import { formatPct } from '../format';
 import type { DataSource } from '../data/merge';
 
@@ -57,13 +58,21 @@ const DATA_MODE: Record<DataSource, string> = {
   upload: 'Your uploaded data, matched to Kentucky public data',
 };
 
+/** "2017-2024": the span of calendar years across the public fields (fiscal-year labels excluded). */
+function publicYearSpan(): string {
+  const years = FIELDS.filter((f) => f.public && !f.data_year.startsWith('FY'))
+    .flatMap((f) => f.data_year.match(/\d{4}/g) ?? [])
+    .map(Number);
+  return `${Math.min(...years)}-${Math.max(...years)}`;
+}
+
 export const ASSUMPTIONS = [
   'Households reached are rounded down: a partly funded household is not counted.',
   'Unspent money is reported, not redistributed.',
   `The health burden score compares each county with fixed Kentucky medians from all 120 counties (diabetes ${formatPct(STATE_MEDIANS.diabetes_pct)}, obesity ${formatPct(STATE_MEDIANS.obesity_pct)}, high blood pressure ${formatPct(STATE_MEDIANS.high_bp_pct)}).`,
   'Health figures are county-level, age-adjusted adult prevalence from CDC PLACES (2024 release). They describe the county, not your participants.',
   'SNAP households estimate need; they are not a count of households eligible for or interested in your program.',
-  'Public figures come from different years (2018–2024); see the source and year beside each figure.',
+  `Public figures come from different years (${publicYearSpan()}); see the source and year beside each figure.`,
 ];
 
 function dataSourcesList(source: DataSource): Brief['dataSources'] {
@@ -73,7 +82,7 @@ function dataSourcesList(source: DataSource): Brief['dataSources'] {
     bySource.get(f.source_label)!.add(f.data_year);
   }
   const list = [...bySource].map(([s, years]) => ({ source: s, years: [...years].sort().join(', ') }));
-  if (source !== 'kentucky') list.push({ source: source === 'sample' ? 'Fictional sample communities' : 'Your uploaded file', years: '—' });
+  if (source !== 'kentucky') list.push({ source: source === 'sample' ? 'Fictional sample communities' : 'Your uploaded file', years: NOT_APPLICABLE_TEXT });
   return list;
 }
 

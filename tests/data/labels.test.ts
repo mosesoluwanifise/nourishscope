@@ -16,8 +16,14 @@ describe('sourceLabel', () => {
   it('builds the short source label from the data dictionary', () => {
     expect(sourceLabel('diabetes_pct', FIELDS)).toBe('Source: CDC PLACES, 2022');
     expect(sourceLabel('high_bp_pct', FIELDS)).toBe('Source: CDC PLACES, 2021');
-    expect(sourceLabel('snap_households', FIELDS)).toBe('Source: Census ACS 5-year, 2020–2024');
+    expect(sourceLabel('snap_households', FIELDS)).toBe('Source: Census ACS 5-year, 2020-2024');
     expect(sourceLabel('arc_status', FIELDS)).toBe('Source: ARC, FY2027');
+  });
+
+  it('labels a measure built from several fields with the span of their years', () => {
+    expect(sourceLabel(['diabetes_pct', 'obesity_pct', 'high_bp_pct'], FIELDS)).toBe('Source: CDC PLACES, 2021-2022');
+    expect(sourceLabel(['diabetes_pct', 'obesity_pct'], FIELDS)).toBe('Source: CDC PLACES, 2022');
+    expect(sourceLabel(['diabetes_pct', 'county_name'], FIELDS)).toBeNull();
   });
 
   it('returns null for identifiers and unknown fields', () => {

@@ -3,8 +3,9 @@
  * The spec's worked example, computed by the real engine at build time and
  * shipped as static HTML (plan R17). No JavaScript on the Home page.
  */
-import { prepareCommunities, runStrategy, STRATEGIES } from '../lib/calc';
-import { COUNTIES, STATE_MEDIANS } from '../lib/data/load';
+import { HEALTH_MEASURES, prepareCommunities, runStrategy, STRATEGIES } from '../lib/calc';
+import { COUNTIES, FIELDS, STATE_MEDIANS } from '../lib/data/load';
+import { sourceLabel } from '../lib/data/labels';
 import { assembleFromCounties, EXAMPLE_COST } from '../lib/data/merge';
 import { STRATEGY_COPY } from '../lib/copy';
 import { formatCurrency, formatInt } from '../lib/format';
@@ -36,7 +37,7 @@ const proportional = results[STRATEGIES.indexOf('proportional')];
         <tr>
           <th scope="col">County</th>
           <th scope="col" class="num">Households in need<SourceLabel field="snap_households" /></th>
-          <th scope="col" class="num">Health burden score<SourceLabel field="diabetes_pct" /></th>
+          <th scope="col" class="num">Health burden score<SourceLabel field={HEALTH_MEASURES} /></th>
           <th scope="col" class="num">Allocation</th>
           <th scope="col" class="num">Households reached</th>
         </tr>
@@ -67,7 +68,7 @@ const proportional = results[STRATEGIES.indexOf('proportional')];
     </table>
   </TableWrap>
   <p class="source-label">
-    Health burden score: diabetes, obesity and high blood pressure compared with the Kentucky middle (CDC PLACES, 2021–2022).
-    Calculated with NourishScope Methodology 1.0.
+    Health burden score: diabetes, obesity and high blood pressure compared with the Kentucky middle.
+    {sourceLabel(HEALTH_MEASURES, FIELDS)}. Calculated with NourishScope Methodology 1.0.
   </p>
 </section>

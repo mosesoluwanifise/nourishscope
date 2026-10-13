@@ -1,5 +1,6 @@
 import { TERM_COPY } from '../../lib/copy';
 import { formatInt } from '../../lib/format';
+import { NOT_ENTERED_TEXT } from '../../lib/data/labels';
 import type { Derived, PlanState } from './state';
 import Field from './Field';
 import TableWrap from '../TableWrap';
@@ -21,7 +22,7 @@ export default function Inputs({ state, derived, setBudget, setCost, setCostConf
   const { costFromUploadForAll } = derived;
   let costHint: string = TERM_COPY.cost.explain;
   if (costFromUploadForAll) costHint = 'Every community has its own cost from your file; this value is not used.';
-  else if (!state.costConfirmed) costHint = 'Example only – replace with your program’s cost.';
+  else if (!state.costConfirmed) costHint = 'Example only. Replace it with your program’s cost.';
 
   return (
     <div class="inputs">
@@ -82,7 +83,7 @@ export default function Inputs({ state, derived, setBudget, setCost, setCostConf
                             error={errors.served[id]} warning={warnings[id]} inputMode="numeric" />
                         ) : (
                           <>
-                            {c.input.served === null ? '—' : formatInt(c.input.served)}
+                            {c.input.served === null ? NOT_ENTERED_TEXT : formatInt(c.input.served)}
                             {warnings[id] && <span class="field__warning">{warnings[id]}</span>}
                           </>
                         )}

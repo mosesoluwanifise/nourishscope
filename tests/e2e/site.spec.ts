@@ -31,6 +31,28 @@ test('no page has sideways scroll at phone width', async ({ page }) => {
   }
 });
 
+test('no page shows an em dash or en dash', async ({ page }) => {
+  const DASH = /[–—]/;
+  const offenders: string[] = [];
+  const check = async (label: string) => {
+    const text = await page.locator('body').innerText();
+    for (const line of text.split('\n')) if (DASH.test(line)) offenders.push(`${label}: ${line.trim()}`);
+  };
+  for (const path of PAGES) {
+    await page.goto(path);
+    await check(`/${path}`);
+  }
+  await page.goto('app');
+  await page.getByLabel('Kentucky county data').check();
+  for (const name of ['Magoffin County', 'Owsley County', 'Wolfe County']) {
+    await page.getByRole('checkbox', { name: new RegExp(`^${name}`) }).check();
+  }
+  await page.getByLabel('Total budget').fill('50000');
+  await expect(page.locator('#module-nutrition')).toBeVisible();
+  await check('/app with results');
+  expect(offenders).toEqual([]);
+});
+
 test('every internal link and download resolves under the base path', async ({ page, request }) => {
   const seen = new Set<string>();
   for (const path of PAGES) {

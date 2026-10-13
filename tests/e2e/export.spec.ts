@@ -43,5 +43,5 @@ test('after confirming the cost, PDF opens print and CSV downloads the brief', a
   const text = await (await download.createReadStream()).toArray().then((chunks) => Buffer.concat(chunks).toString('utf8'));
   expect(text).toContain('Tool version,1.0.0');
   expect(text).toContain('Community,County,Number of households in need');
-  expect(text).toContain('Magoffin County,Magoffin County,1759,SNAP households,,1759,1.147,Rural or distressed,100,26427.28,264,26400');
+  expect(text).toContain('Magoffin County,Magoffin County,1759,SNAP households,Not entered,1759,1.147,Rural or distressed,100,26427.28,264,26400');
 });

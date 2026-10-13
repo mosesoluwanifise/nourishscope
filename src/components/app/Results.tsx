@@ -2,11 +2,12 @@
  * Results across the three modules (plan U6). Every figure column carries
  * its source label; suppressed values use the fixed wording from labels.ts.
  */
-import { STRATEGIES, type Strategy } from '../../lib/calc';
+import { HEALTH_MEASURES, STRATEGIES, type Strategy } from '../../lib/calc';
 import { STATE_MEDIANS } from '../../lib/data/load';
 import { STRATEGY_COPY, TERM_COPY } from '../../lib/copy';
 import { formatCurrency, formatDataValue, formatInt, formatPct } from '../../lib/format';
 import { withBase } from '../../config/site';
+import { NOT_ENTERED_TEXT } from '../../lib/data/labels';
 import SourceLabel from '../SourceLabel';
 import TableWrap from '../TableWrap';
 import BarChart from './BarChart';
@@ -21,6 +22,10 @@ interface Props {
 type StrategyProps = Omit<Props, 'setStrategy'>;
 
 const methodologyLink = (anchor: string) => withBase(`/methodology#${anchor}`);
+
+/** Coverage is blank either because households served is missing or because total need is 0. */
+const coverageText = (value: number | null, needOnly: boolean) =>
+  value !== null ? formatPct(value) : needOnly ? NOT_ENTERED_TEXT : 'Not available';
 
 export function NutritionModule({ derived, strategy }: StrategyProps) {
   const index = STRATEGIES.indexOf(strategy);
@@ -37,7 +42,7 @@ export function NutritionModule({ derived, strategy }: StrategyProps) {
       </p>
       {result.totals.coverageBefore === null || result.totals.coverageAfter === null ? (
         <p class="callout">
-          Coverage: — <br />
+          Coverage: {derived.needOnly ? NOT_ENTERED_TEXT : 'Not available'} <br />
           {derived.needOnly
             ? 'Enter the number of households served for every community to see coverage.'
             : 'Coverage cannot be calculated because the total number of households in need is 0.'}
@@ -50,7 +55,7 @@ export function NutritionModule({ derived, strategy }: StrategyProps) {
       )}
       <TableWrap label="Allocation by community">
         <table>
-          <caption>Allocation by community — {STRATEGY_COPY[strategy].name}</caption>
+          <caption>Allocation by community: {STRATEGY_COPY[strategy].name}</caption>
           <thead>
             <tr>
               <th scope="col">Community</th>
@@ -74,7 +79,7 @@ export function NutritionModule({ derived, strategy }: StrategyProps) {
                   {derived.needSources[c.id] === 'snap' && <SourceLabel field="snap_households" />}
                   {derived.needSources[c.id] === 'upload' && <SourceLabel field="snap_households" uploaded />}
                 </td>
-                <td class="num">{c.served === null ? '—' : formatInt(c.served)}</td>
+                <td class="num">{c.served === null ? NOT_ENTERED_TEXT : formatInt(c.served)}</td>
                 <td class="num">{formatInt(c.unmet)}</td>
                 <td>{c.flagged ? 'Yes' : 'No'}</td>
                 <td class="num">{formatCurrency(result.rows[i].allocation)}</td>
@@ -123,7 +128,7 @@ export function HealthModule({ derived }: { derived: Derived }) {
               {measures.map(([key, label]) => (
                 <th scope="col" class="num" key={key}>{label}<SourceLabel field={key} /></th>
               ))}
-              <th scope="col" class="num">{TERM_COPY.healthIndex.name}</th>
+              <th scope="col" class="num">{TERM_COPY.healthIndex.name}<SourceLabel field={HEALTH_MEASURES} /></th>
             </tr>
           </thead>
           <tbody>
@@ -237,7 +242,7 @@ export function StrategyComparison({ derived, strategy, setStrategy }: Props) {
                 <td class="num">{formatInt(r.totals.reached)}</td>
                 <td class="num">{formatCurrency(r.totals.spend)}</td>
                 <td class="num">{formatCurrency(r.totals.unspent)}</td>
-                <td class="num">{r.totals.coverageAfter === null ? '—' : formatPct(r.totals.coverageAfter)}</td>
+                <td class="num">{coverageText(r.totals.coverageAfter, derived.needOnly)}</td>
                 <td class="num">{formatPct(equity[i].budgetPct)}</td>
               </tr>
             ))}
@@ -253,7 +258,7 @@ export function StrategyComparison({ derived, strategy, setStrategy }: Props) {
               <div><dt>Households reached</dt><dd>{formatInt(r.totals.reached)}</dd></div>
               <div><dt>Spend</dt><dd>{formatCurrency(r.totals.spend)}</dd></div>
               <div><dt>Unspent</dt><dd>{formatCurrency(r.totals.unspent)}</dd></div>
-              <div><dt>Coverage after</dt><dd>{r.totals.coverageAfter === null ? '—' : formatPct(r.totals.coverageAfter)}</dd></div>
+              <div><dt>Coverage after</dt><dd>{coverageText(r.totals.coverageAfter, derived.needOnly)}</dd></div>
               <div><dt>Budget to rural or distressed</dt><dd>{formatPct(equity[i].budgetPct)}</dd></div>
             </dl>
           </li>

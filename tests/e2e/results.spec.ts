@@ -9,9 +9,11 @@ async function selectCounties(page: Page, names: string[], budget = '50000') {
 
 test('need-only mode shows the coverage prompt and all five strategies (AE1)', async ({ page }) => {
   await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
-  await expect(page.locator('.module').first()).toContainText('Coverage: —');
+  await expect(page.locator('.module').first()).toContainText('Coverage: Not entered');
   await expect(page.locator('.module').first()).toContainText('Enter the number of households served');
   await expect(page.locator('.comparison-table tbody tr')).toHaveCount(5);
+  await expect(page.locator('.print-brief')).toContainText('Coverage: Not entered');
+  await expect(page.locator('.print-brief tbody tr').first()).toContainText('Not entered');
 });
 
 test('suppressed grocery data reads as not reported, never zero (AE4)', async ({ page }) => {
@@ -26,6 +28,12 @@ test('health figures carry their CDC PLACES source and year', async ({ page }) =
   const headers = page.locator('#module-health').locator('..').locator('thead');
   await expect(headers).toContainText('Source: CDC PLACES, 2022');
   await expect(headers).toContainText('Source: CDC PLACES, 2021');
+  await expect(headers).toContainText('Source: CDC PLACES, 2021-2022');
+});
+
+test('the FIPS code source has a data year of Not applicable', async ({ page }) => {
+  await page.goto('data-sources');
+  await expect(page.locator('.source-list li', { hasText: 'County FIPS codes' })).toContainText('Not applicable');
 });
 
 test('strategy comparison shows cards instead of the table at phone width', async ({ page }) => {
