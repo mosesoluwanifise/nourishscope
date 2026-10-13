@@ -18,8 +18,8 @@ interface Props {
 
 const { frontmatter } = Astro.props;
 const { profile } = frontmatter;
-// Markdown authors write "/app" or "/images/x.jpg"; add the base path so those links
-// keep working if the site is ever served from a sub-path again.
+// Markdown authors write "/app" or "/images/x.jpg"; add the deploy base path so
+// those links work on GitHub Pages (plan: every internal link goes through the base).
 const html = prefixRootLinks(await Astro.slots.render('default'), import.meta.env.BASE_URL);
 ---
 <BaseLayout title={frontmatter.title} description={frontmatter.description}>

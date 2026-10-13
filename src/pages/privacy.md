@@ -16,6 +16,6 @@ description: NourishScope keeps your data in your browser. No accounts, cookies 
 
 **Upload program totals only.** The tool needs counts by community, not people. Do not include names, addresses or other personal details in files you upload.
 
-**Hosting.** The site is hosted on Cloudflare Pages. Like any web host, Cloudflare may record visitors’ IP addresses and the pages they request, under [Cloudflare’s privacy policy](https://www.cloudflare.com/privacypolicy/). NourishScope itself does not collect or receive this information.
+**Hosting.** The site is hosted on GitHub Pages. Like any web host, GitHub may record visitors’ IP addresses and the pages they request, under [GitHub’s privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). NourishScope itself does not collect or receive this information.
 
 **Email.** If you email the founder from the [Contact](/contact) page, your message is handled like any other email and is not connected to anything you did in the tool.

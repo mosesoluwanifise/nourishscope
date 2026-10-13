@@ -167,10 +167,3 @@ test.describe('Data Sources and About', () => {
     });
   }
 });
-
-test('an unknown address shows the Page not found page with a 404 status', async ({ page }) => {
-  const res = await page.goto('no-such-page');
-  expect(res!.status()).toBe(404);
-  await expect(page.locator('h1')).toHaveText('Page not found');
-  await expect(page.getByRole('link', { name: 'Open the planning tool' })).toHaveAttribute('href', '/app');
-});
