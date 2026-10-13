@@ -129,6 +129,34 @@ th .source-label { font-weight: 400; }
 .strategy-option input { margin-top: 0.35rem; width: 1.15rem; height: 1.15rem; }
 .strategy-option__explain { display: block; color: var(--color-text-muted); font-size: 0.95rem; }
 
+/* Results switch between tables and cards by the width of the results column, not the screen:
+   beside the 22rem inputs column a wide screen can still leave the results narrow. */
+.stage--results { container-type: inline-size; }
+.distribution__cards, .nutrition__cards { list-style: none; padding: 0; display: grid; gap: var(--space-3); margin-bottom: var(--space-3); }
+.distribution__table, .nutrition__table { display: none; }
+@container (min-width: 46rem) {
+  .distribution__table, .nutrition__table { display: block; }
+  .distribution__cards, .nutrition__cards, .nutrition__total { display: none; }
+}
+.nutrition__county { display: block; font-weight: 400; font-size: 0.95rem; color: var(--color-text-muted); }
+.nutrition__lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); margin-bottom: var(--space-2); }
+.nutrition__amount { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.nutrition__cards .source-label { font-weight: 400; }
+.distribution th.num, .distribution td.num { white-space: normal; }
+.distribution thead th.num { min-width: 7rem; }
+.distribution__amount { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.distribution__reached { display: block; color: var(--color-text-muted); font-size: 0.875rem; font-weight: 400; }
+.distribution .card dl div { align-items: baseline; padding: var(--space-1) 0; border-top: 1px solid var(--color-border); }
+.distribution .card dl div:first-child { border-top: 0; }
+.distribution .card dd { text-align: right; }
+.distribution .is-selected dt { font-weight: 700; color: var(--color-text); }
+.col-selected { background: var(--color-primary-soft); }
+.tag {
+  display: inline-block; margin-left: var(--space-2); padding: 0 0.45rem; border-radius: 999px;
+  font-size: 0.875rem; font-weight: 600; background: var(--color-primary-soft); color: var(--color-link-hover);
+  border: 1px solid currentColor;
+}
+
 .comparison-cards { display: none; list-style: none; padding: 0; gap: var(--space-3); }
 .card { border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); padding: var(--space-3) var(--space-4); }
 .card--selected { border: 2px solid var(--color-primary-fill); }

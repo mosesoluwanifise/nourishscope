@@ -9,8 +9,9 @@ async function selectCounties(page: Page, names: string[], budget = '50000') {
 
 test('need-only mode shows the coverage prompt and all five strategies (AE1)', async ({ page }) => {
   await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
-  await expect(page.locator('.module').first()).toContainText('Coverage: Not entered');
-  await expect(page.locator('.module').first()).toContainText('Enter the number of households served');
+  const nutrition = page.locator('#module-nutrition').locator('..');
+  await expect(nutrition).toContainText('Coverage: Not entered');
+  await expect(nutrition).toContainText('Enter the number of households served');
   await expect(page.locator('.comparison-table tbody tr')).toHaveCount(5);
   await expect(page.locator('.print-brief')).toContainText('Coverage: Not entered');
   await expect(page.locator('.print-brief tbody tr').first()).toContainText('Not entered');
@@ -120,4 +121,86 @@ test('the results bar never shows on a wide screen', async ({ page }) => {
   await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(page.locator('.results-bar')).toHaveCount(0);
+});
+
+test.describe('Who gets the money', () => {
+  const noSideScroll = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+
+  test('is a table with five strategy columns when the results column is wide', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+    const table = page.locator('.distribution__table table');
+    await expect(table).toBeVisible();
+    await expect(table.locator('thead th')).toHaveCount(6);
+    await expect(table.locator('thead')).toContainText('Share by unmet need (selected)');
+    await expect(table.locator('tbody tr')).toHaveCount(3);
+    await expect(table.locator('tbody tr').first()).toContainText('Magoffin County');
+    const wolfe = table.locator('tbody tr', { hasText: 'Wolfe County' });
+    await expect(wolfe.locator('td').nth(4)).toContainText('$50,000.00');
+    await expect(wolfe.locator('td').nth(4)).toContainText('Most');
+    await expect(table.locator('tfoot')).toContainText('500 households');
+    const fit = await page.locator('.distribution__table').evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(fit).toBeLessThanOrEqual(0);
+  });
+
+  for (const width of [1024, 1100]) {
+    test(`fits without clipping at ${width}px beside the inputs column`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+      await expect(page.locator('.distribution__cards')).toBeVisible();
+      await expect(page.locator('.distribution__table')).toBeHidden();
+      expect(await noSideScroll(page)).toBeLessThanOrEqual(0);
+    });
+  }
+
+  test('is one card per community on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+    const cards = page.locator('.distribution__cards > li');
+    await expect(cards).toHaveCount(3);
+    await expect(cards.first().locator('dt')).toHaveText([
+      'Equal split', 'Share by unmet need (selected)', 'Share by need, with a minimum for all',
+      'Share by need and health burden', 'Lowest cost first',
+    ]);
+    expect(await noSideScroll(page)).toBeLessThanOrEqual(0);
+  });
+
+  test('shows the first 10 of a long selection until asked for all', async ({ page }) => {
+    await page.goto('app');
+    await page.getByLabel('Kentucky county data').check();
+    await page.getByLabel('Appalachian counties only').check();
+    await page.getByRole('button', { name: /Select all shown/ }).click();
+    await page.getByLabel('Total budget').fill('500000');
+    const cards = page.locator('.distribution__cards > li');
+    const rows = page.locator('.distribution__table tbody tr');
+    const visibleCount = async () => (await cards.first().isVisible() ? cards.count() : rows.count());
+    expect(await visibleCount()).toBe(10);
+    const more = page.getByRole('button', { name: /Show all 54 communities/ });
+    await more.click();
+    expect(await visibleCount()).toBe(54);
+    await expect(page.getByRole('button', { name: 'Show the first 10 communities' })).toHaveAttribute('aria-expanded', 'true');
+  });
+});
+
+test.describe('planning table on a phone', () => {
+  test('becomes cards that lead with allocation and households reached', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+    await expect(page.locator('.nutrition__table')).toBeHidden();
+    const magoffin = page.locator('.nutrition__cards > li', { hasText: 'Magoffin County' });
+    await expect(magoffin.locator('.nutrition__lead')).toHaveText(/\$26,427\.28\s*264 households reached/);
+    await expect(magoffin).toContainText('Not entered');
+    await expect(magoffin).toContainText('Source: Census ACS 5-year, 2020-2024');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  });
+
+  test('stays a table on a wide screen, with no clipped columns at 1100px', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await selectCounties(page, ['Magoffin County', 'Owsley County', 'Wolfe County']);
+    await expect(page.locator('.nutrition__table')).toBeVisible();
+    await expect(page.locator('.nutrition__cards')).toBeHidden();
+    await page.setViewportSize({ width: 1100, height: 900 });
+    await expect(page.locator('.nutrition__cards')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  });
 });

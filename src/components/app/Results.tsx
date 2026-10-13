@@ -53,7 +53,7 @@ export function NutritionModule({ derived, strategy }: StrategyProps) {
           <strong>{formatPct(result.totals.coverageAfter)}</strong>.
         </p>
       )}
-      <TableWrap label="Allocation by community">
+      <TableWrap label="Allocation by community" class="nutrition__table">
         <table>
           <caption>Allocation by community: {STRATEGY_COPY[strategy].name}</caption>
           <thead>
@@ -97,6 +97,34 @@ export function NutritionModule({ derived, strategy }: StrategyProps) {
           </tfoot>
         </table>
       </TableWrap>
+      <ul class="nutrition__cards" aria-label={`Allocation by community: ${STRATEGY_COPY[strategy].name}`}>
+        {prepared.map((c, i) => (
+          <li key={c.id} class="card">
+            <h4>{c.name}{showCounty && <span class="nutrition__county">{communities[i].county.county_name}</span>}</h4>
+            <p class="nutrition__lead">
+              <span class="nutrition__amount">{formatCurrency(result.rows[i].allocation)}</span>
+              <span>{formatInt(result.rows[i].reached)} households reached</span>
+            </p>
+            <dl>
+              <div>
+                <dt>
+                  {TERM_COPY.need.name}
+                  {derived.needSources[c.id] === 'snap' && <SourceLabel field="snap_households" />}
+                  {derived.needSources[c.id] === 'upload' && <SourceLabel field="snap_households" uploaded />}
+                </dt>
+                <dd>{formatInt(c.need)}</dd>
+              </div>
+              <div><dt>{TERM_COPY.served.name}</dt><dd>{c.served === null ? NOT_ENTERED_TEXT : formatInt(c.served)}</dd></div>
+              <div><dt>{TERM_COPY.unmet.name}</dt><dd>{formatInt(c.unmet)}</dd></div>
+              <div><dt>{TERM_COPY.equityFlag.name}</dt><dd>{c.flagged ? 'Yes' : 'No'}</dd></div>
+            </dl>
+          </li>
+        ))}
+      </ul>
+      <p class="nutrition__total">
+        Total: <strong>{formatInt(result.totals.reached)}</strong> households reached, <strong>{formatCurrency(result.totals.spend)}</strong> spent,{' '}
+        <strong>{formatCurrency(result.totals.unspent)}</strong> unspent.
+      </p>
       <p class="field__hint">
         Households reached are rounded down: a partly funded household is not counted. Unspent money is reported, not
         moved to other communities. <a href={methodologyLink('results')}>How is this calculated?</a>

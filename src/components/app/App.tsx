@@ -13,6 +13,7 @@ import { parseUpload } from '../../lib/data/parse-upload';
 import { buildBrief } from '../../lib/export/brief-model';
 import { formatCurrency, formatInt } from '../../lib/format';
 import CountySelector from './CountySelector';
+import Distribution from './Distribution';
 import DataSourcePicker from './DataSourcePicker';
 import Evaluation from './Evaluation';
 import ExportPanel from './ExportPanel';
@@ -35,6 +36,7 @@ import './app.css';
 const SAMPLE_ROWS = parseUpload(sampleCsv).rows;
 
 const SECTIONS = [
+  ['distribution', 'Who gets the money'],
   ['module-nutrition', 'Nutrition Program Planning'],
   ['module-health', 'Community Health Context'],
   ['module-food', 'Food System and Access'],
@@ -169,6 +171,7 @@ export default function App() {
                   <ul>{SECTIONS.map(([id, label]) => <li key={id}><a href={`#${id}`}>{label}</a></li>)}</ul>
                 </nav>
                 <p class="change-inputs"><a href="#your-program">Change inputs</a></p>
+                <Distribution results={derived.results!} strategy={state.strategy} budget={derived.budget!} />
                 <NutritionModule derived={derived} strategy={state.strategy} />
                 <HealthModule derived={derived} />
                 <FoodModule derived={derived} />
