@@ -7,7 +7,7 @@ profile:
   alt: Portrait of Yetunde Khadijat Olaogun
   name: Yetunde Khadijat Olaogun
   role: Founder and lead designer, NourishScope. Graduate Research Assistant, University of Kentucky.
-  email: Yetunde.Olaogun@uky.edu
+  email: Olaogunyetunde29@gmail.com
 ---
 
 # About the Founder
@@ -26,4 +26,4 @@ Community nutrition programs make hard choices every year: which communities to 
 
 ## Connect
 
-Email: [Yetunde.Olaogun@uky.edu](mailto:Yetunde.Olaogun@uky.edu)
+Email: [Olaogunyetunde29@gmail.com](mailto:Olaogunyetunde29@gmail.com)
