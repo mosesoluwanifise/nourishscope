@@ -1,6 +1,7 @@
 /**
- * The /app planning tool (plan U5–U7): one page, three stages.
+ * The /app planning tool: one page, three stages, revealed one at a time.
  *   1. Your data   2. Your program   3. Results
+ * Stages 2 and 3 appear once a data source is chosen. Evaluation stays available throughout.
  */
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import sampleCsv from '../../../data/sample/nourishscope_sample_communities.csv?raw';
@@ -12,11 +13,14 @@ import { parseUpload } from '../../lib/data/parse-upload';
 import { buildBrief } from '../../lib/export/brief-model';
 import { formatCurrency, formatInt } from '../../lib/format';
 import CountySelector from './CountySelector';
+import Distribution from './Distribution';
 import DataSourcePicker from './DataSourcePicker';
 import Evaluation from './Evaluation';
 import ExportPanel from './ExportPanel';
 import Inputs from './Inputs';
 import PrintBrief from './PrintBrief';
+import ResultsBar from './ResultsBar';
+import ResultsSummary from './ResultsSummary';
 import {
   EquityPanel,
   FoodModule,
@@ -27,19 +31,21 @@ import {
 } from './Results';
 import { derive, hasUnsavedWork, INITIAL_STATE, withCost, withSource, type PlanState } from './state';
 import UploadPanel from './UploadPanel';
+import { useWideContainer } from './useWideContainer';
 import './app.css';
 
 const SAMPLE_ROWS = parseUpload(sampleCsv).rows;
 
 const SECTIONS = [
+  ['distribution', 'Who gets the money'],
   ['module-nutrition', 'Nutrition Program Planning'],
   ['module-health', 'Community Health Context'],
   ['module-food', 'Food System and Access'],
   ['compare', 'Compare strategies'],
   ['sensitivity', 'Cost sensitivity'],
   ['equity', 'Equity'],
-  ['evaluation', 'Evaluation'],
   ['export', 'Save or export'],
+  ['evaluation', 'Evaluation'],
 ] as const;
 
 function currentSourceLabel(state: PlanState): string | null {
@@ -56,6 +62,8 @@ export default function App() {
   const derived = useMemo(() => derive(state, SAMPLE_ROWS), [state]);
   const brief = useMemo(() => buildBrief(state, derived, new Date()), [state, derived]);
   const update = (patch: Partial<PlanState>) => setState((s) => ({ ...s, ...patch }));
+  // Tables need about 46rem; beside the 22rem inputs column a wide screen can still leave less.
+  const [resultsRef, wideResults] = useWideContainer(46);
 
   // Mark the island as hydrated so the shell's failure handler stays quiet.
   useEffect(() => {
@@ -76,7 +84,9 @@ export default function App() {
   const selected = derived.results?.find((r) => r.strategy === state.strategy);
   const summary = selected
     ? `Results updated: ${formatInt(selected.totals.reached)} households reached, ${formatCurrency(selected.totals.unspent)} unspent, using ${STRATEGY_COPY[state.strategy].name}.`
-    : derived.emptyMessage ?? '';
+    : state.source
+      ? `Your program section is shown. ${derived.emptyMessage ?? ''}`
+      : '';
   const timer = useRef<number>();
   useEffect(() => {
     window.clearTimeout(timer.current);
@@ -127,15 +137,15 @@ export default function App() {
               Results and exports are labelled as sample data.
             </p>
           )}
+          <p class="evaluation-link"><a href="#evaluation">Already ran a program? Evaluate your results</a></p>
         </section>
 
+        <div class="visually-hidden" aria-live="polite" aria-atomic="true">{announcement}</div>
+
+        {state.source && (
         <div class="planner__body">
           <section class="stage stage--inputs" aria-labelledby="stage-program" id="your-program">
             <h2 id="stage-program"><span class="stage__number">2</span> Your program</h2>
-            {state.source === 'kentucky' && (
-              <CountySelector selected={state.selectedFips}
-                onChange={(next) => setState((s) => ({ ...s, selectedFips: next(s.selectedFips) }))} />
-            )}
             <Inputs
               state={state}
               derived={derived}
@@ -145,21 +155,27 @@ export default function App() {
               setFloor={(floorPctText) => update({ floorPctText })}
               setNeed={(id, v) => setState((s) => ({ ...s, needText: { ...s.needText, [id]: v } }))}
               setServed={(id, v) => setState((s) => ({ ...s, servedText: { ...s.servedText, [id]: v } }))}
+              counties={state.source === 'kentucky' && (
+                <CountySelector selected={state.selectedFips}
+                  onChange={(next) => setState((s) => ({ ...s, selectedFips: next(s.selectedFips) }))} />
+              )}
             />
           </section>
 
-          <section class="stage stage--results" aria-labelledby="stage-results">
-            <h2 id="stage-results"><span class="stage__number">3</span> Results</h2>
-            <div class="visually-hidden" aria-live="polite" aria-atomic="true">{announcement}</div>
+          <section class="stage stage--results" aria-labelledby="stage-results" id="results" ref={resultsRef}>
+            <h2 id="stage-results" tabIndex={-1}><span class="stage__number">3</span> Results</h2>
             {derived.emptyMessage ? (
               <p class="callout empty-state">{derived.emptyMessage}</p>
             ) : (
               <>
+                <ResultsSummary result={selected!} needOnly={derived.needOnly} strategy={state.strategy}
+                  setStrategy={(strategy: Strategy) => update({ strategy })} />
                 <nav aria-label="Results sections" class="section-nav">
                   <ul>{SECTIONS.map(([id, label]) => <li key={id}><a href={`#${id}`}>{label}</a></li>)}</ul>
                 </nav>
                 <p class="change-inputs"><a href="#your-program">Change inputs</a></p>
-                <NutritionModule derived={derived} strategy={state.strategy} />
+                <Distribution results={derived.results!} strategy={state.strategy} budget={derived.budget!} wide={wideResults} />
+                <NutritionModule derived={derived} strategy={state.strategy} wide={wideResults} />
                 <HealthModule derived={derived} />
                 <FoodModule derived={derived} />
                 <StrategyComparison derived={derived} strategy={state.strategy}
@@ -168,11 +184,15 @@ export default function App() {
                 <EquityPanel derived={derived} strategy={state.strategy} />
               </>
             )}
-            <Evaluation />
             <ExportPanel brief={brief} costConfirmed={derived.costConfirmed}
               previewOpen={previewOpen} setPreviewOpen={setPreviewOpen} />
           </section>
         </div>
+        )}
+
+        {/* Same tree position before and after a source is chosen, so entries are never lost. */}
+        <Evaluation />
+        {selected && <ResultsBar targetId="results" headingId="stage-results" strategy={state.strategy} reached={selected.totals.reached} />}
       </div>
       {brief && <PrintBrief brief={brief} visible={previewOpen} />}
     </div>

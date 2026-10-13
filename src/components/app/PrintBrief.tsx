@@ -3,7 +3,8 @@
  * print.css shows only this when printing (plan R11).
  */
 import type { Brief } from '../../lib/export/brief-model';
-import { formatCurrency, formatInt, formatPct } from '../../lib/format';
+import { formatCoverage, formatCurrency, formatInt, formatPct } from '../../lib/format';
+import { NOT_ENTERED_TEXT } from '../../lib/data/labels';
 
 function costLine(brief: Brief): string {
   const { cost, costSource, costConfirmed } = brief.inputs;
@@ -52,7 +53,7 @@ export default function PrintBrief({ brief, visible }: { brief: Brief; visible: 
           {brief.rows.map((r, i) => (
             <tr key={i}>
               <th scope="row">{r.community}</th><td>{r.county}</td>
-              <td class="num">{formatInt(r.need)}</td><td class="num">{r.served === null ? '—' : formatInt(r.served)}</td>
+              <td class="num">{formatInt(r.need)}</td><td class="num">{r.served === null ? NOT_ENTERED_TEXT : formatInt(r.served)}</td>
               <td class="num">{formatInt(r.unmet)}</td><td class="num">{r.healthIndex.toFixed(3)}</td>
               <td>{r.flag ? 'Yes' : 'No'}</td><td class="num">{formatCurrency(r.cost)}</td>
               <td class="num">{formatCurrency(r.allocation)}</td>
@@ -65,8 +66,10 @@ export default function PrintBrief({ brief, visible }: { brief: Brief; visible: 
             <td class="num">{formatInt(brief.totals.reached)}</td><td class="num">{formatCurrency(brief.totals.spend)}</td></tr>
         </tfoot>
       </table>
-      {brief.totals.coverageBefore !== null && (
+      {brief.totals.coverageBefore !== null ? (
         <p>Coverage before: {formatPct(brief.totals.coverageBefore)}. After: {formatPct(brief.totals.coverageAfter!)}.</p>
+      ) : (
+        <p>Coverage: {formatCoverage(null, brief.needOnly)}</p>
       )}
 
       <h3>All strategies</h3>

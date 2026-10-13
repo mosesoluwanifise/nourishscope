@@ -182,6 +182,28 @@ describe('buildDataset validation', () => {
     expect(problems.join('\n')).toMatch(/diabetes_pct.*data_year/);
   });
 
+  it('fails when a data year uses an en dash, naming the field', () => {
+    const dictionary = fixtureDictionary({
+      diabetes_pct: dictRow('diabetes_pct', 'diabetes_pct', 'Community health', 'CDC PLACES', '2020–2024'),
+    });
+    const problems = errorsOf(() => buildDataset(fixtureCounties(120), dictionary));
+    expect(problems.join('\n')).toMatch(/data_year for diabetes_pct contains an en or em dash/);
+  });
+
+  it('fails when a description uses an em dash', () => {
+    const row = dictRow('diabetes_pct', 'diabetes_pct', 'Community health', 'CDC PLACES', '2022');
+    row[2] = 'Adults with diabetes — age-adjusted';
+    const problems = errorsOf(() => buildDataset(fixtureCounties(120), fixtureDictionary({ diabetes_pct: row })));
+    expect(problems.join('\n')).toMatch(/description for diabetes_pct contains an en or em dash/);
+  });
+
+  it('the real workbook has no dashes in any label, year or description the site shows', async () => {
+    const { dictionary } = await readWorkbook();
+    const shown = ['description', 'source_label', 'data_year'].map((name) => dictionary[0].indexOf(name));
+    const cells = dictionary.slice(1).flatMap((row) => shown.map((i) => row[i]));
+    expect(cells.filter((c) => typeof c === 'string' && /[–—]/.test(c))).toEqual([]);
+  });
+
   it('fails when the dictionary drops a key the app needs', () => {
     const dictionary = fixtureDictionary();
     const withoutDiabetes = dictionary.filter((row) => row[5] !== 'diabetes_pct');

@@ -1,0 +1,58 @@
+---
+/**
+ * Home hero visual: the worked example's allocations as labelled CSS bars.
+ * Computed at build time from the shared worked example; ships no JavaScript.
+ */
+import { STRATEGY_COPY } from '../lib/copy';
+import { formatCurrency, formatInt } from '../lib/format';
+import { EXAMPLE_BUDGET, EXAMPLE_COUNTIES, examplePrepared, exampleProportional } from '../lib/worked-example';
+
+const rows = examplePrepared.map((c, i) => ({
+  name: c.name,
+  allocation: exampleProportional.rows[i].allocation,
+  reached: exampleProportional.rows[i].reached,
+}));
+const top = Math.max(...rows.map((r) => r.allocation));
+const places = EXAMPLE_COUNTIES.map((n) => n.replace(/ County$/, ''));
+const placesText = `${places.slice(0, -1).join(', ')} and ${places.at(-1)} counties`;
+---
+<figure class="allocation-preview">
+  <figcaption>
+    <span class="allocation-preview__title">Worked example</span>
+    {formatCurrency(EXAMPLE_BUDGET)} across {placesText}, {STRATEGY_COPY.proportional.name.toLowerCase()}
+  </figcaption>
+  <ul>
+    {rows.map((r) => (
+      <li>
+        <span class="allocation-preview__name">{r.name}</span>
+        <span class="allocation-preview__track" aria-hidden="true">
+          <span class="allocation-preview__bar" style={`width: ${(r.allocation / top) * 100}%`}></span>
+        </span>
+        <span class="allocation-preview__value">
+          {formatCurrency(r.allocation)}
+          <span class="allocation-preview__reached">{formatInt(r.reached)} households reached</span>
+        </span>
+      </li>
+    ))}
+  </ul>
+  <p class="allocation-preview__total">
+    {formatInt(exampleProportional.totals.reached)} households reached, {formatCurrency(exampleProportional.totals.unspent)} unspent.
+  </p>
+</figure>
+
+<style>
+  .allocation-preview {
+    margin: 0; padding: var(--space-4);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+  }
+  figcaption { color: var(--color-text-muted); margin-bottom: var(--space-3); }
+  .allocation-preview__title { display: block; color: var(--color-text); font-weight: 700; font-size: 1.1rem; }
+  ul { list-style: none; padding: 0; margin: 0 0 var(--space-3); display: grid; gap: var(--space-3); }
+  li { display: grid; grid-template-columns: 1fr auto; gap: var(--space-1) var(--space-3); align-items: center; }
+  .allocation-preview__name { font-weight: 600; grid-column: 1; grid-row: 1; }
+  .allocation-preview__value { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; grid-column: 2; grid-row: 1 / span 2; }
+  .allocation-preview__reached { display: block; font-weight: 400; font-size: 0.875rem; color: var(--color-text-muted); }
+  .allocation-preview__track { grid-column: 1; grid-row: 2; display: block; height: 0.75rem; background: var(--color-surface-muted); border-radius: 999px; }
+  .allocation-preview__bar { display: block; height: 100%; background: var(--color-primary-fill); border-radius: 999px; }
+  .allocation-preview__total { margin: 0; font-size: 0.95rem; color: var(--color-text-muted); }
+</style>

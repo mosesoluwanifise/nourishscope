@@ -1,19 +1,33 @@
 /* NourishScope global styles. System fonts only: no web-font requests. */
+/*
+ * Colour tokens are named by role, because a colour that works as link text on the page
+ * background is not the same colour that works as a fill behind button text in dark mode.
+ * tests/design/contrast.test.ts checks every role pair in both schemes.
+ *
+ * Corner radius rule: controls, cards, callouts and tables use --radius (8px); status
+ * badges are pills (999px); step markers are circles (50%). Nothing else.
+ */
 :root {
-  --color-bg: #fbfaf6;
+  color-scheme: light;
+  --color-bg: #f6f7f5;
   --color-surface: #ffffff;
-  --color-surface-muted: #f2f0e8;
+  --color-surface-muted: #eceeeb;
   --color-text: #1d2521;
   --color-text-muted: #4a554f;
-  --color-border: #d6d3c7;
-  --color-primary: #1f5c40;
-  --color-primary-strong: #164531;
+  --color-border: #d3d7d2;
+  --color-input-border: #7f867f;
+  --color-link: #1f5c40;
+  --color-link-hover: #164531;
+  --color-primary-fill: #1f5c40;
+  --color-primary-fill-hover: #164531;
+  --color-on-primary: #ffffff;
   --color-primary-soft: #e3efe7;
   --color-accent: #8a4b08;
   --color-accent-soft: #fbefdc;
   --color-danger: #a8231b;
   --color-danger-soft: #fdecea;
   --color-focus: #1a5fb4;
+  --color-bar: #5f8f76;
   --radius: 8px;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -26,6 +40,32 @@
   --prose-width: 42rem;
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+
+/* Dark mode follows the device. `screen` keeps printing on the light tokens. */
+@media screen and (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-bg: #121614;
+    --color-surface: #1a1f1c;
+    --color-surface-muted: #232a26;
+    --color-text: #e4eae6;
+    --color-text-muted: #a8b3ad;
+    --color-border: #38423d;
+    --color-input-border: #7d8983;
+    --color-link: #84cca5;
+    --color-link-hover: #abdfc2;
+    --color-primary-fill: #84cca5;
+    --color-primary-fill-hover: #abdfc2;
+    --color-on-primary: #0e1a13;
+    --color-primary-soft: #1d3127;
+    --color-accent: #eeb36c;
+    --color-accent-soft: #352816;
+    --color-danger: #ff9d92;
+    --color-danger-soft: #3a1c19;
+    --color-focus: #8ab4f8;
+    --color-bar: #4f8f6d;
+  }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -47,8 +87,8 @@ h2 { font-size: clamp(1.35rem, 3vw, 1.75rem); }
 h3 { font-size: 1.2rem; }
 p, ul, ol, table { margin: 0 0 var(--space-4); }
 
-a { color: var(--color-primary); text-underline-offset: 0.15em; }
-a:hover { color: var(--color-primary-strong); }
+a { color: var(--color-link); text-underline-offset: 0.15em; }
+a:hover { color: var(--color-link-hover); }
 
 :focus-visible {
   outline: 3px solid var(--color-focus);
@@ -61,13 +101,13 @@ img { max-width: 100%; height: auto; }
   position: absolute;
   left: var(--space-2);
   top: -3rem;
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--color-primary-fill);
+  color: var(--color-on-primary);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius);
   z-index: 100;
 }
-.skip-link:focus { top: var(--space-2); color: #fff; }
+.skip-link:focus { top: var(--space-2); color: var(--color-on-primary); }
 
 .visually-hidden {
   position: absolute !important;
@@ -93,17 +133,17 @@ img { max-width: 100%; height: auto; }
   min-height: 44px;
   padding: var(--space-2) var(--space-5);
   border-radius: var(--radius);
-  border: 2px solid var(--color-primary);
-  background: var(--color-primary);
-  color: #fff;
+  border: 2px solid var(--color-primary-fill);
+  background: var(--color-primary-fill);
+  color: var(--color-on-primary);
   font: inherit;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
 }
-.button:hover { background: var(--color-primary-strong); border-color: var(--color-primary-strong); color: #fff; }
-.button--secondary { background: transparent; color: var(--color-primary); }
-.button--secondary:hover { background: var(--color-primary-soft); color: var(--color-primary-strong); }
+.button:hover { background: var(--color-primary-fill-hover); border-color: var(--color-primary-fill-hover); color: var(--color-on-primary); }
+.button--secondary { background: transparent; border-color: var(--color-link); color: var(--color-link); }
+.button--secondary:hover { background: var(--color-primary-soft); border-color: var(--color-link-hover); color: var(--color-link-hover); }
 .button[aria-disabled='true'] {
   background: var(--color-surface-muted);
   border-color: var(--color-border);
@@ -126,12 +166,12 @@ thead th { background: var(--color-surface-muted); font-weight: 600; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 tbody tr:last-child td { border-bottom: 0; }
 
-.source-label { display: block; font-size: 0.8rem; color: var(--color-text-muted); }
+.source-label { display: block; font-size: 0.875rem; color: var(--color-text-muted); }
 .marker-text { font-style: italic; color: var(--color-text-muted); }
 
 /* Callouts */
 .callout {
-  border-left: 4px solid var(--color-primary);
+  border-left: 4px solid var(--color-primary-fill);
   background: var(--color-primary-soft);
   padding: var(--space-3) var(--space-4);
   border-radius: 0 var(--radius) var(--radius) 0;
@@ -145,6 +185,11 @@ tbody tr:last-child td { border-bottom: 0; }
 .prose { max-width: var(--prose-width); overflow-wrap: break-word; }
 .prose p, .prose li { overflow-wrap: anywhere; }
 .prose h1 { margin-top: var(--space-6); }
+/* Portraits and figures in Markdown pages: small, rounded, beside the text on wide screens. */
+.prose img { max-width: min(100%, 15rem); border-radius: var(--radius); }
+@media (min-width: 40rem) {
+  .prose p:has(> img:only-child) { float: right; margin: 0 0 var(--space-4) var(--space-5); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import WorkedExample from '../components/WorkedExample.astro';
 import { METHODOLOGY_VERSION, TOOL_VERSION, UPLOAD_TEMPLATE_PATH, withBase } from '../config/site';
 import { STRATEGY_COPY, TERM_COPY } from '../lib/copy';
 import { STATE_MEDIANS } from '../lib/data/load';
@@ -39,11 +40,11 @@ import { formatPct } from '../lib/format';
     <h2 id="inputs">2. Inputs and defaults</h2>
     <dl>
       <dt>{TERM_COPY.need.name}</dt>
-      <dd>For Kentucky county data this starts as the number of households receiving SNAP (Census ACS 5-year, 2020–2024). You may replace it. Required, a whole number of 0 or more.</dd>
+      <dd>For Kentucky county data this starts as the number of households receiving SNAP (Census ACS 5-year, 2020-2024). You may replace it. Required, a whole number of 0 or more.</dd>
       <dt>{TERM_COPY.served.name}</dt>
       <dd>No public default; blank unless you enter it. A whole number of 0 or more. If it is more than households in need, the tool warns you and sets households still needing help to 0.</dd>
       <dt>Cost per household</dt>
-      <dd>Required. Pre-filled with $100, labelled “Example only – replace with your program’s cost”. One value for all communities, unless your upload gives a cost for a community. The planning brief cannot be saved until you confirm or change the cost.</dd>
+      <dd>Required. Pre-filled with $100, labelled “Example only. Replace it with your program’s cost.” One value for all communities, unless your upload gives a cost for a community. The planning brief cannot be saved until you confirm or change the cost.</dd>
       <dt>Budget (B)</dt>
       <dd>Required, more than $0.</dd>
       <dt>{TERM_COPY.floorShare.name}</dt>
@@ -56,7 +57,7 @@ import { formatPct } from '../lib/format';
     <h2 id="core">3. Core measures for each community</h2>
     <ul>
       <li><strong>{TERM_COPY.unmet.name} (U)</strong> = the larger of (households in need − households served) and 0. If households served is blank, U equals households in need and the tool runs in “need-only” mode.</li>
-      <li><strong>Coverage</strong> is shown only when households served is entered for every selected community: total served ÷ total in need × 100. In need-only mode the tool shows “—” and asks you to enter households served.</li>
+      <li><strong>Coverage</strong> is shown only when households served is entered for every selected community: total served ÷ total in need × 100. In need-only mode the tool shows “Not entered” and asks you to enter households served.</li>
       <li><strong>{TERM_COPY.healthIndex.name} (H)</strong> = the average of (county rate ÷ Kentucky median) across the available health measures, or 1.0 if none are available. The Kentucky medians are fixed from all 120 counties: diabetes {formatPct(STATE_MEDIANS.diabetes_pct)}, obesity {formatPct(STATE_MEDIANS.obesity_pct)}, high blood pressure {formatPct(STATE_MEDIANS.high_bp_pct)}.</li>
     </ul>
 
@@ -83,6 +84,8 @@ import { formatPct } from '../lib/format';
       <li><strong>Spend</strong> = households reached × cost. <strong>Unspent</strong> = B − total spend. Version 1.0 reports unspent money; it does not move it to other communities.</li>
       <li><strong>Coverage after</strong> (when households served is entered for every community) = (total served + total reached) ÷ total in need × 100.</li>
     </ul>
+
+    <WorkedExample />
 
     <h2 id="sensitivity">6. Cost sensitivity</h2>
     <p>The tool repeats the allocation and results with every cost multiplied by 0.8 and by 1.2, keeping the budget the same, and shows households reached and unspent for −20%, as entered, and +20%.</p>

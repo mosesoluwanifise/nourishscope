@@ -2,13 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import DataSourcesTable from '../components/DataSourcesTable.astro';
 import { withBase } from '../config/site';
+import { NOT_APPLICABLE_TEXT } from '../lib/data/labels';
 
 const LAST_UPDATED = 'October 2026 (dataset v1.0)';
 const sources = [
   {
-    name: 'American Community Survey (ACS) 5-Year Estimates, 2020–2024',
+    name: 'American Community Survey (ACS) 5-Year Estimates, 2020-2024',
     publisher: 'U.S. Census Bureau',
-    year: '2020–2024',
+    year: '2020-2024',
     fields: 'Population (B01003), total households (B11001), households receiving SNAP and their share (B22003).',
     link: 'https://data.census.gov/table/ACSDT5Y2024.B22003?g=040XX00US21$0500000',
   },
@@ -22,8 +23,8 @@ const sources = [
   {
     name: 'Food Environment Atlas, 2025 data download',
     publisher: 'U.S. Department of Agriculture, Economic Research Service (USDA ERS)',
-    year: '2018–2023 (varies by field)',
-    fields: 'Low income and low access to a store (2019), grocery stores per 1,000 residents (2020), SNAP-authorized stores (2023), farmers markets and those accepting SNAP (2018), poverty, child poverty, persistent poverty and median household income (2021), and metro or nonmetro status (2023). Grocery stores per 1,000 is withheld by USDA for 42 small counties; NourishScope shows these as “Not reported (suppressed by source)”, not zero.',
+    year: '2017-2023 (varies by field)',
+    fields: 'Low income and low access to a store (2019), grocery stores per 1,000 residents (2020), SNAP-authorized stores (2023), farmers markets and those accepting SNAP (2018), poverty, child poverty and median household income (2021), persistent poverty (2017-2021), and metro or nonmetro status (2023). Grocery stores per 1,000 is withheld by USDA for 42 small counties; NourishScope shows these as “Not reported (suppressed by source)”, not zero.',
     link: 'https://www.ers.usda.gov/data-products/food-environment-atlas/',
   },
   {
@@ -36,11 +37,14 @@ const sources = [
   {
     name: 'County FIPS codes',
     publisher: 'U.S. Census Bureau',
-    year: '—',
+    year: NOT_APPLICABLE_TEXT,
     fields: 'County name, five-digit FIPS code and state, used to join all the sources.',
     link: 'https://www.census.gov/library/reference/code-lists/ansi.html',
   },
 ];
+
+/** "census.gov" from a source link, for descriptive link text. */
+const domainOf = (link: string) => new URL(link).hostname.replace(/^www\./, '');
 ---
 <BaseLayout title="Data Sources" description="Where every figure in NourishScope comes from: publisher, year, link and last update.">
   <article>
@@ -53,18 +57,18 @@ const sources = [
 
     <ol class="source-list">
       {sources.map((s) => (
-        <li>
+        <li class="source-card">
           <h2>{s.name}</h2>
           <dl>
             <div><dt>Publisher</dt><dd>{s.publisher}</dd></div>
             <div><dt>Data year</dt><dd>{s.year}</dd></div>
             <div><dt>Used for</dt><dd>{s.fields}</dd></div>
-            <div><dt>Link</dt><dd><a href={s.link}>{s.link.replace(/^https:\/\//, '')}</a></dd></div>
-            <div><dt>Last updated in NourishScope</dt><dd>{LAST_UPDATED}</dd></div>
           </dl>
+          <p class="source-card__link"><a href={s.link}>View this source on {domainOf(s.link)}</a></p>
         </li>
       ))}
     </ol>
+    <p class="prose">All sources were last updated in NourishScope in {LAST_UPDATED}.</p>
 
     <h2>Your own figures</h2>
     <p class="prose">
@@ -72,8 +76,10 @@ const sources = [
       and they stay in your browser.
     </p>
 
-    <h2>Every field, with its source and year</h2>
-    <DataSourcesTable />
+    <details class="field-table">
+      <summary><h2>Every field, with its source and year</h2></summary>
+      <DataSourcesTable />
+    </details>
 
     <h2>Download the data</h2>
     <p class="prose">
@@ -85,11 +91,19 @@ const sources = [
 </BaseLayout>
 
 <style>
-  .source-list { padding-left: var(--space-5); }
-  .source-list h2 { font-size: 1.2rem; }
-  .source-list dl { display: grid; gap: var(--space-1); }
-  .source-list dl div { display: grid; grid-template-columns: minmax(8rem, 14rem) 1fr; gap: var(--space-3); }
-  .source-list dt { font-weight: 600; }
-  .source-list dd { margin: 0; overflow-wrap: anywhere; }
-  @media (max-width: 40rem) { .source-list dl div { grid-template-columns: 1fr; gap: 0; } }
+  .source-list { list-style: none; padding: 0; display: grid; gap: var(--space-4); }
+  @media (min-width: 56rem) { .source-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .source-card {
+    display: flex; flex-direction: column;
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); padding: var(--space-4);
+  }
+  .source-card h2 { font-size: 1.15rem; margin-top: 0; }
+  .source-card dl { display: grid; gap: var(--space-2); margin: 0 0 var(--space-3); }
+  .source-card dt { font-weight: 600; font-size: 0.95rem; color: var(--color-text-muted); }
+  .source-card dd { margin: 0; overflow-wrap: break-word; }
+  .source-card__link { margin: auto 0 0; }
+  .source-card__link a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+  .field-table { margin: var(--space-6) 0 var(--space-4); }
+  .field-table summary { cursor: pointer; min-height: 44px; }
+  .field-table summary h2 { display: inline; margin: 0; font-size: 1.35rem; }
 </style>

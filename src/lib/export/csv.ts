@@ -1,5 +1,6 @@
 /** CSV export of the planning brief, built in the browser (plan R12). */
 import type { Brief } from './brief-model';
+import { missingCoverageText, NOT_ENTERED_TEXT } from '../data/labels';
 
 const FORMULA_START = /^[=+\-@\t\r]/;
 
@@ -46,7 +47,7 @@ export function briefToCsv(brief: Brief): string {
     'Households still needing help', 'Health burden score', 'Rural or distressed', 'Cost per household',
     'Allocation', 'Households reached', 'Spend']));
   for (const r of brief.rows) {
-    lines.push(line([r.community, r.county, r.need, r.needSource, r.served, r.unmet, r.healthIndex, r.flag,
+    lines.push(line([r.community, r.county, r.need, r.needSource, r.served ?? NOT_ENTERED_TEXT, r.unmet, r.healthIndex, r.flag,
       r.cost, r.allocation, r.reached, r.spend]));
   }
   lines.push(line(['Total', '', '', '', '', '', '', '', '', '', brief.totals.reached, brief.totals.spend]));
@@ -54,11 +55,13 @@ export function briefToCsv(brief: Brief): string {
   if (brief.totals.coverageBefore !== null) {
     lines.push(line(['Coverage before (%)', brief.totals.coverageBefore]));
     lines.push(line(['Coverage after (%)', brief.totals.coverageAfter]));
+  } else {
+    lines.push(line(['Coverage', missingCoverageText(brief.needOnly)]));
   }
   lines.push('');
 
   lines.push(line(['Strategy', 'Households reached', 'Spend', 'Unspent', 'Coverage after (%)']));
-  for (const c of brief.comparison) lines.push(line([c.strategy, c.reached, c.spend, c.unspent, c.coverageAfter]));
+  for (const c of brief.comparison) lines.push(line([c.strategy, c.reached, c.spend, c.unspent, c.coverageAfter ?? missingCoverageText(brief.needOnly)]));
   lines.push('');
 
   lines.push(line(['Cost sensitivity', 'Households reached', 'Unspent']));

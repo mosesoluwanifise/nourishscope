@@ -98,6 +98,15 @@ export function buildDataset(
   const dictionary = readDictionary(dictionaryRows, problems);
   if (problems.length) throw new DatasetError(problems);
 
+  // The site shows these on every source label; ranges use a hyphen (UI/UX plan R21).
+  for (const entry of dictionary) {
+    for (const name of ['data_year', 'description', 'source_label'] as const) {
+      if (/[–—]/.test(entry[name])) {
+        problems.push(`Data_Dictionary ${name} for ${entry.key || entry.field} contains an en or em dash; use a hyphen`);
+      }
+    }
+  }
+
   const header = countyRows[0].map(text);
   const used = dictionary.filter((entry) => !entry.userEntered);
 

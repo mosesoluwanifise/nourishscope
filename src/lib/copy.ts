@@ -51,7 +51,7 @@ export const TERM_COPY = {
   },
   need: {
     name: 'Number of households in need',
-    explain: 'For Kentucky county data this starts as the number of households receiving SNAP (Census ACS 2020–2024). You can replace it.',
+    explain: 'For Kentucky county data this starts as the number of households receiving SNAP (Census ACS 2020-2024). You can replace it.',
   },
   served: {
     name: 'Number of households served',

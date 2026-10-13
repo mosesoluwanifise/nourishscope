@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  derivedLabel,
   isNotApplicable,
   isSuppressed,
   markerText,
@@ -16,8 +17,14 @@ describe('sourceLabel', () => {
   it('builds the short source label from the data dictionary', () => {
     expect(sourceLabel('diabetes_pct', FIELDS)).toBe('Source: CDC PLACES, 2022');
     expect(sourceLabel('high_bp_pct', FIELDS)).toBe('Source: CDC PLACES, 2021');
-    expect(sourceLabel('snap_households', FIELDS)).toBe('Source: Census ACS 5-year, 2020–2024');
+    expect(sourceLabel('snap_households', FIELDS)).toBe('Source: Census ACS 5-year, 2020-2024');
     expect(sourceLabel('arc_status', FIELDS)).toBe('Source: ARC, FY2027');
+  });
+
+  it('labels a measure built from several fields with the span of their years', () => {
+    expect(sourceLabel(['diabetes_pct', 'obesity_pct', 'high_bp_pct'], FIELDS)).toBe('Source: CDC PLACES, 2021-2022');
+    expect(sourceLabel(['diabetes_pct', 'obesity_pct'], FIELDS)).toBe('Source: CDC PLACES, 2022');
+    expect(sourceLabel(['diabetes_pct', 'county_name'], FIELDS)).toBeNull();
   });
 
   it('returns null for identifiers and unknown fields', () => {
@@ -29,6 +36,18 @@ describe('sourceLabel', () => {
     for (const field of FIELDS.filter((f) => f.public)) {
       expect(sourceLabel(field.key, FIELDS)).toMatch(/^Source: .+, .+$/);
     }
+  });
+});
+
+describe('derivedLabel', () => {
+  it('says the figure was calculated by NourishScope, never a plain source label', () => {
+    expect(derivedLabel('diabetes_pct', 'median', FIELDS)).toBe(
+      'Middle value across Kentucky counties, calculated by NourishScope from CDC PLACES, 2022',
+    );
+    expect(derivedLabel('snap_households', 'total', FIELDS)).toBe(
+      'Total of county figures, calculated by NourishScope from Census ACS 5-year, 2020-2024',
+    );
+    expect(derivedLabel('county_name', 'total', FIELDS)).toBeNull();
   });
 });
 

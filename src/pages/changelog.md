@@ -6,7 +6,7 @@ description: Dated release notes for NourishScope and its Kentucky county datase
 
 # Changelog
 
-## 1.0.0 — October 2026
+## 1.0.0, October 2026
 
 First public release.
 
@@ -19,7 +19,7 @@ First public release.
 
 ### Data releases in dataset v1.0
 
-- U.S. Census Bureau, American Community Survey 5-Year Estimates, 2020–2024.
+- U.S. Census Bureau, American Community Survey 5-Year Estimates, 2020-2024.
 - CDC PLACES County Data, 2024 release (2022 diabetes and obesity; 2021 high blood pressure).
 - USDA ERS Food Environment Atlas, 2025 data download.
 - Appalachian Regional Commission, County Economic Status, Fiscal Year 2027.

@@ -22,7 +22,11 @@ const isCurrent = (href: string) => current === withBase(href).replace(/\/$/, ''
         ))}
       </ul>
     </nav>
-    <a class="button site-header__app" href={withBase('/app')} aria-current={isCurrent('/app') ? 'page' : undefined}>Open the app</a>
+    {!isCurrent('/app') && (
+      <a class="button site-header__app" href={withBase('/app')} aria-label="Open the app">
+        <span class="site-header__app-long">Open the app</span><span class="site-header__app-short" aria-hidden="true">App</span>
+      </a>
+    )}
     <details class="site-header__menu">
       <summary>Menu</summary>
       <nav aria-label="Main (menu)">
@@ -57,7 +61,7 @@ const isCurrent = (href: string) => current === withBase(href).replace(/\/$/, ''
     text-decoration: none;
     margin-right: auto;
   }
-  .site-header__mark { color: var(--color-primary); }
+  .site-header__mark { color: var(--color-link); }
   .site-header__nav ul, .site-header__menu ul {
     list-style: none;
     margin: 0;
@@ -68,6 +72,12 @@ const isCurrent = (href: string) => current === withBase(href).replace(/\/$/, ''
   .site-header__nav a, .site-header__menu a { color: var(--color-text); }
   [aria-current='page'] { font-weight: 700; }
   .site-header__app { padding: var(--space-1) var(--space-4); }
+  .site-header__app-short { display: none; }
+  @media (max-width: 26.25rem) {
+    .site-header__inner { gap: var(--space-3); }
+    .site-header__app-long { display: none; }
+    .site-header__app-short { display: inline; }
+  }
   .site-header__menu { display: none; }
   .site-header__menu summary {
     min-height: 44px;

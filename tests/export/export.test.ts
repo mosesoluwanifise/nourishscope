@@ -102,6 +102,23 @@ describe('CSV export', () => {
     expect(rows.find((r) => r[0] === 'Tool version')![1]).toBe('1.0.0');
   });
 
+  it('writes Not entered for blank served values and need-only coverage, never a dash', () => {
+    const brief = buildBrief(workedExample(), derive(workedExample(), SAMPLE_ROWS), NOW)!;
+    const csv = briefToCsv(brief);
+    const rows = Papa.parse<string[]>(csv).data;
+    const headerIndex = rows.findIndex((r) => r[0] === 'Community');
+    expect(rows[headerIndex + 1][4]).toBe('Not entered');
+    expect(rows.find((r) => r[0] === 'Coverage')![1]).toBe('Not entered');
+    expect(rows.find((r) => r[0] === 'Equal split')![4]).toBe('Not entered');
+    expect(csv).not.toMatch(/[–—]/);
+  });
+
+  it('gives sample data a source year of Not applicable', () => {
+    const state: PlanState = { ...withSource(INITIAL_STATE, 'sample'), budgetText: '50000' };
+    const brief = buildBrief(state, derive(state, SAMPLE_ROWS), NOW)!;
+    expect(brief.dataSources.at(-1)).toEqual({ source: 'Fictional sample communities', years: 'Not applicable' });
+  });
+
   it.each([
     ['=HYPERLINK("http://x")', `"'=HYPERLINK(""http://x"")"`],
     ['+1', "'+1"],

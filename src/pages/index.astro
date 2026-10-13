@@ -1,50 +1,102 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import WorkedExample from '../components/WorkedExample.astro';
+import AllocationPreview from '../components/AllocationPreview.astro';
 import { withBase } from '../config/site';
+import { median, preciseSum, STRATEGIES } from '../lib/calc';
+import { STRATEGY_COPY } from '../lib/copy';
+import { derivedLabel } from '../lib/data/labels';
+import { COUNTIES, FIELDS, STATE_MEDIANS } from '../lib/data/load';
+import { formatCurrency, formatInt, formatPct } from '../lib/format';
+import { EXAMPLE_BUDGET, EXAMPLE_COST_PER_HOUSEHOLD, exampleProportional, exampleResults } from '../lib/worked-example';
+
+const numbers = (key: 'snap_households' | 'low_income_low_access_pct') =>
+  COUNTIES.map((c) => c[key]).filter((v): v is number => typeof v === 'number');
 
 const pillars = [
   {
+    key: 'nutrition',
     title: 'Nutrition',
+    figure: formatInt(preciseSum(numbers('snap_households'))),
+    caption: 'Kentucky households receive SNAP.',
+    label: derivedLabel('snap_households', 'total', FIELDS),
     text: 'Compare need across communities and test five ways to divide a fixed budget, with households reached and money left over for each.',
   },
   {
+    key: 'health',
     title: 'Community Health',
-    text: 'See diabetes, obesity and high blood pressure for each county beside the plan, and weight the budget by health burden if you choose.',
+    figure: formatPct(STATE_MEDIANS.diabetes_pct),
+    caption: 'of adults have diabetes in the middle Kentucky county.',
+    label: derivedLabel('diabetes_pct', 'median', FIELDS),
+    text: 'See diabetes, obesity and high blood pressure beside the plan, and weight the budget by health burden if you choose.',
   },
   {
+    key: 'food',
     title: 'Food System and Agricultural Sustainability',
+    figure: formatPct(median(numbers('low_income_low_access_pct'))),
+    caption: 'of residents in the middle county have low income and low access to a store.',
+    label: derivedLabel('low_income_low_access_pct', 'median', FIELDS),
     text: 'Check food access, grocery stores, SNAP retailers and farmers markets that accept SNAP before deciding where to work.',
   },
 ];
+
+/** "Magoffin County $26,427.28, Wolfe County $14,663.46 and Owsley County $8,909.25", largest first. */
+const shares = [...exampleProportional.rows]
+  .sort((a, b) => b.allocation - a.allocation)
+  .map((r) => `${r.name} ${formatCurrency(r.allocation)}`);
+const sharesText = `${shares.slice(0, -1).join(', ')} and ${shares.at(-1)}`;
 ---
 <BaseLayout title="NourishScope">
   <section class="hero" aria-labelledby="hero-heading">
-    <h1 id="hero-heading">Decide where your nutrition program budget will do the most good.</h1>
-    <p class="hero__lead">
-      NourishScope is a free planning tool for Cooperative Extension, EFNEP, public health staff, food banks and funders
-      working in Kentucky. Compare need across all 120 counties, model budget choices, and document the reasoning behind
-      them. No accounts, no specialist software, and your data never leaves your browser.
-    </p>
-    <div class="button-row">
-      <a class="button" href={withBase('/app')}>Open the app</a>
-      <a class="button button--secondary" href={withBase('/methodology')}>Read the methodology</a>
+    <div class="hero__text">
+      <h1 id="hero-heading">Decide where your nutrition program budget will do the most good.</h1>
+      <p class="hero__lead">
+        A free planning tool for Kentucky nutrition programs. Compare need, test budget choices, keep your data on your device.
+      </p>
+      <div class="button-row">
+        <a class="button" href={withBase('/app')}>Open the app</a>
+        <a class="button button--secondary" href={withBase('/methodology')}>Read the methodology</a>
+      </div>
     </div>
+    <AllocationPreview />
   </section>
+
+  <p class="audience">
+    Built for Cooperative Extension and EFNEP agents, public health staff, food banks and funders working across Kentucky’s
+    120 counties. No accounts and no specialist software.
+  </p>
 
   <section aria-labelledby="pillars-heading">
     <h2 id="pillars-heading">Three areas in one plan</h2>
     <ul class="pillars">
       {pillars.map((p) => (
-        <li>
+        <li class={`pillar pillar--${p.key}`}>
           <h3>{p.title}</h3>
+          <p class="pillar__figure"><strong>{p.figure}</strong> {p.caption}</p>
+          <p class="source-label">{p.label}</p>
           <p>{p.text}</p>
+          {p.key === 'nutrition' && (
+            <ul class="pillar__strategies" aria-label="The five strategies">
+              {STRATEGIES.map((s) => <li>{STRATEGY_COPY[s].name}</li>)}
+            </ul>
+          )}
         </li>
       ))}
     </ul>
   </section>
 
-  <WorkedExample />
+  <section aria-labelledby="example-summary-heading">
+    <h2 id="example-summary-heading">The worked example, in one line</h2>
+    <p>
+      With {formatCurrency(EXAMPLE_BUDGET)} and a cost of {formatCurrency(EXAMPLE_COST_PER_HOUSEHOLD)} per household, sharing
+      by unmet need gives {sharesText}.
+    </p>
+    <ul class="example-strategies">
+      {exampleResults.map((r) => (
+        <li><span>{STRATEGY_COPY[r.strategy].name}</span> <strong>{formatInt(r.totals.reached)} households reached</strong></li>
+      ))}
+    </ul>
+    <p><a href={withBase('/methodology#worked-example')}>See the full calculation</a></p>
+  </section>
 
   <section aria-labelledby="trust-heading">
     <h2 id="trust-heading">Built to be checked</h2>
@@ -57,19 +109,35 @@ const pillars = [
 </BaseLayout>
 
 <style>
-  .hero { padding: var(--space-5) 0 var(--space-4); max-width: 48rem; }
-  .hero__lead { font-size: 1.15rem; color: var(--color-text-muted); }
+  .hero { display: grid; gap: var(--space-5); padding: var(--space-5) 0 var(--space-4); align-items: center; }
+  @media (min-width: 48rem) {
+    .hero { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--space-6); }
+  }
+  .hero h1 { margin-top: 0; }
+  .hero__lead { font-size: 1.15rem; color: var(--color-text-muted); max-width: 34rem; }
   .button-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-  .pillars {
-    list-style: none; padding: 0;
-    display: grid; gap: var(--space-4);
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  .audience { max-width: 48rem; border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
+
+  .pillars { list-style: none; padding: 0; display: grid; gap: var(--space-4); }
+  @media (min-width: 48rem) {
+    .pillars { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+    .pillar--nutrition { grid-row: span 2; }
   }
-  .pillars li {
+  .pillar {
     background: var(--color-surface); border: 1px solid var(--color-border);
-    border-top: 4px solid var(--color-primary); border-radius: var(--radius);
-    padding: var(--space-4);
+    border-top: 4px solid var(--color-primary-fill); border-radius: var(--radius); padding: var(--space-4);
   }
-  .pillars h3 { margin-top: 0; }
-  .pillars p { margin: 0; }
+  .pillar h3 { margin-top: 0; }
+  .pillar p:last-child { margin-bottom: 0; }
+  .pillar__figure { margin-bottom: var(--space-1); }
+  .pillar__figure strong { display: block; font-size: 2rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .pillar--nutrition .pillar__figure strong { font-size: 2.75rem; }
+  .pillar .source-label { margin-bottom: var(--space-3); }
+  .pillar__strategies { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
+  .pillar__strategies li {
+    padding: var(--space-2) var(--space-3); background: var(--color-surface-muted); border-radius: var(--radius); font-weight: 600;
+  }
+
+  .example-strategies { list-style: none; padding: 0; display: grid; gap: var(--space-1); max-width: 34rem; }
+  .example-strategies li { display: flex; justify-content: space-between; gap: var(--space-3); border-bottom: 1px solid var(--color-border); padding: var(--space-1) 0; }
 </style>

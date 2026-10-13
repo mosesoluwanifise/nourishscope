@@ -17,7 +17,7 @@ import sys
 
 import openpyxl
 
-ACS = ("Census ACS 5-year", "2020–2024")
+ACS = ("Census ACS 5-year", "2020-2024")
 ERS = "USDA ERS Food Environment Atlas"
 PLACES = "CDC PLACES"
 ARC = "ARC"
@@ -36,7 +36,7 @@ VALUES = {
     "snap_household_pct": ("snap_household_pct", *ACS),
     "poverty_rate_2021": ("poverty_rate", ERS, "2021"),
     "child_poverty_rate_2021": ("child_poverty_rate", ERS, "2021"),
-    "persistent_poverty_2017_21": ("persistent_poverty", ERS, "2017–2021"),
+    "persistent_poverty_2017_21": ("persistent_poverty", ERS, "2017-2021"),
     "median_household_income_2021": ("median_household_income", ERS, "2021"),
     "diabetes_pct": ("diabetes_pct", PLACES, "2022"),
     "obesity_pct": ("obesity_pct", PLACES, "2022"),

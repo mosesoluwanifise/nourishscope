@@ -6,7 +6,8 @@ import { sourceLabel, UPLOAD_SOURCE_TEXT } from '../lib/data/labels';
 import { FIELDS } from '../lib/data/load';
 
 interface Props {
-  field: string;
+  /** One field, or every field a combined measure is built from. */
+  field: string | readonly string[];
   /** True when the figure came from the user's upload instead. */
   uploaded?: boolean;
 }
