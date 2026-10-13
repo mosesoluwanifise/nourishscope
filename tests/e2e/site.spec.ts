@@ -139,8 +139,8 @@ test('/app ships a no-JavaScript message with working links', async ({ request }
   const html = await (await request.get('app')).text();
   const noscript = html.match(/<noscript>([\s\S]*?)<\/noscript>/)?.[1] ?? '';
   expect(noscript).toContain('The planning tool needs JavaScript');
-  expect(noscript).toContain('read <a href="/nourishscope/methodology">');
-  expect(noscript).toContain('href="/nourishscope/downloads/nourishscope_upload_template.csv"');
+  expect(noscript).toContain('read <a href="/methodology">');
+  expect(noscript).toContain('href="/downloads/nourishscope_upload_template.csv"');
 });
 
 test.describe('Data Sources and About', () => {

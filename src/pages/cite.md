@@ -10,7 +10,7 @@ If you use NourishScope in a report, grant application or publication, please ci
 
 ## Suggested citation
 
-Olaogun, Y. K. (2026). *NourishScope: A decision-support tool for community nutrition programs* (Version 1.0.0; Methodology 1.0) [Computer software]. https://mosesoluwanifise.github.io/nourishscope/
+Olaogun, Y. K. (2026). *NourishScope: A decision-support tool for community nutrition programs* (Version 1.0.0; Methodology 1.0) [Computer software]. https://nourishscope.app/
 
 ## Data
 

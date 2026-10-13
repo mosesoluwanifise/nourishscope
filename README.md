@@ -4,7 +4,7 @@ NourishScope is a free, browser-based decision-support tool. It helps community 
 
 Everything runs in the visitor's browser. There are no accounts and no server, and data users upload never leaves their device.
 
-- **Live site:** https://mosesoluwanifise.github.io/nourishscope/
+- **Live site:** https://nourishscope.app/
 - **Founder:** Yetunde Khadijat Olaogun
 - **Methodology:** v1.0. See `reference/NourishScope_Calculation_Specification.docx` and the Methodology page.
 
@@ -46,6 +46,8 @@ npm run check
 ## Deploy
 
 Pushing to `main` runs `.github/workflows/deploy.yml`. It tests, builds and deploys to GitHub Pages. In the repository settings, set **Pages → Source** to **GitHub Actions**.
+
+The site is served at the root of its own domain, `nourishscope.app` (set under **Pages → Custom domain**). The domain's DNS must point at GitHub Pages: four `A` records for the bare domain (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`) and a `CNAME` record for `www` pointing to `mosesoluwanifise.github.io`. To serve the site from a sub-path again, change `base` in `astro.config.mjs`.
 
 ## Refresh the data (yearly)
 
