@@ -31,9 +31,30 @@ npm run dev
 
 ## Test
 
+Unit tests, including golden tests that reproduce the calculation spec's worked example:
+
 ```bash
 npm test
 ```
+
+Everything CI runs: the type check, unit tests, build, bundle-size check, and the Playwright accessibility and flow tests. The first run needs `npx playwright install chromium`.
+
+```bash
+npm run check
+```
+
+## Deploy
+
+Pushing to `main` runs `.github/workflows/deploy.yml`. It tests, builds and deploys to GitHub Pages. In the repository settings, set **Pages → Source** to **GitHub Actions**.
+
+## Refresh the data (yearly)
+
+1. Update `data/NourishScope_Kentucky_County_Dataset_v1.0.xlsx`.
+   - If a column's year changes (for example `arc_status_fy2027` becomes `arc_status_fy2028`), rename the header, then update that row's `field` and `data_year` in the `Data_Dictionary` sheet. Leave `key` unchanged.
+2. Run `npm run build-data`. It stops with a clear message if anything is missing or blank where it shouldn't be.
+3. Record the refresh date and source releases on the Changelog page.
+
+`scripts/fill_nourishscope_dataset.py` fetches the Census and CDC figures. It still writes a CSV and needs updating to write the workbook directly; this is a planned follow-up. Keep CDC PLACES on the 2024 release until CDC restores the Kentucky measures.
 
 ## Licences
 

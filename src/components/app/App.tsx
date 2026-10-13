@@ -60,7 +60,8 @@ export default function App() {
   const unsaved = hasUnsavedWork(state);
   useEffect(() => {
     if (!unsaved) return;
-    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    // preventDefault() is the standard way to ask the browser to confirm leaving.
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [unsaved]);

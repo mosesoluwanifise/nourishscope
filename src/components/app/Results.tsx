@@ -8,6 +8,7 @@ import { STRATEGY_COPY, TERM_COPY } from '../../lib/copy';
 import { formatCurrency, formatDataValue, formatInt, formatPct } from '../../lib/format';
 import { withBase } from '../../config/site';
 import SourceLabel from '../SourceLabel';
+import TableWrap from '../TableWrap';
 import BarChart from './BarChart';
 import type { Derived } from './state';
 
@@ -40,7 +41,7 @@ export function NutritionModule({ derived, strategy }: Omit<Props, 'setStrategy'
           <strong>{formatPct(result.totals.coverageAfter!)}</strong>.
         </p>
       )}
-      <div class="table-wrap">
+      <TableWrap label="Allocation by community">
         <table>
           <caption>Allocation by community — {STRATEGY_COPY[strategy].name}</caption>
           <thead>
@@ -83,7 +84,7 @@ export function NutritionModule({ derived, strategy }: Omit<Props, 'setStrategy'
             </tr>
           </tfoot>
         </table>
-      </div>
+      </TableWrap>
       <p class="field__hint">
         Households reached are rounded down: a partly funded household is not counted. Unspent money is reported, not
         moved to other communities. <a href={methodologyLink('results')}>How is this calculated?</a>
@@ -106,7 +107,7 @@ export function HealthModule({ derived }: { derived: Derived }) {
         Adult prevalence, age-adjusted, for each community’s county. The {TERM_COPY.healthIndex.name.toLowerCase()} compares
         these with the Kentucky middle: {TERM_COPY.healthIndex.explain}
       </p>
-      <div class="table-wrap">
+      <TableWrap label="Health measures by community">
         <table>
           <caption>Health measures by community</caption>
           <thead>
@@ -138,7 +139,7 @@ export function HealthModule({ derived }: { derived: Derived }) {
             </tr>
           </tbody>
         </table>
-      </div>
+      </TableWrap>
     </section>
   );
 }
@@ -149,7 +150,7 @@ export function FoodModule({ derived }: { derived: Derived }) {
     <section aria-labelledby="module-food" class="module">
       <h3 id="module-food">Food System and Access</h3>
       <p>Food access and food retail for each community’s county.</p>
-      <div class="table-wrap">
+      <TableWrap label="Food access by community">
         <table>
           <caption>Food access by community</caption>
           <thead>
@@ -183,7 +184,7 @@ export function FoodModule({ derived }: { derived: Derived }) {
             })}
           </tbody>
         </table>
-      </div>
+      </TableWrap>
     </section>
   );
 }
@@ -209,7 +210,7 @@ export function StrategyComparison({ derived, strategy, setStrategy }: Props) {
         ))}
       </fieldset>
 
-      <div class="table-wrap comparison-table">
+      <TableWrap label="Results by strategy" class="comparison-table">
         <table>
           <caption>Results by strategy</caption>
           <thead>
@@ -235,7 +236,7 @@ export function StrategyComparison({ derived, strategy, setStrategy }: Props) {
             ))}
           </tbody>
         </table>
-      </div>
+      </TableWrap>
 
       <ul class="comparison-cards" aria-label="Results by strategy">
         {results.map((r, i) => (
@@ -267,7 +268,7 @@ export function SensitivityPanel({ derived, strategy }: Omit<Props, 'setStrategy
     <section aria-labelledby="sensitivity-heading" class="module" id="sensitivity">
       <h3 id="sensitivity-heading" tabIndex={-1}>Cost sensitivity</h3>
       <p>What happens to <strong>{STRATEGY_COPY[strategy].name}</strong> if your cost per household is 20% lower or higher than entered. The budget stays the same.</p>
-      <div class="table-wrap">
+      <TableWrap label="Cost sensitivity">
         <table>
           <caption class="visually-hidden">Cost sensitivity</caption>
           <thead><tr><th scope="col">Cost per household</th><th scope="col" class="num">Households reached</th><th scope="col" class="num">Unspent</th></tr></thead>
@@ -281,7 +282,7 @@ export function SensitivityPanel({ derived, strategy }: Omit<Props, 'setStrategy
             ))}
           </tbody>
         </table>
-      </div>
+      </TableWrap>
     </section>
   );
 }

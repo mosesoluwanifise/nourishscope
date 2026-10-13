@@ -142,7 +142,8 @@ tbody tr:last-child td { border-bottom: 0; }
 .callout > :last-child { margin-bottom: 0; }
 
 /* Prose pages */
-.prose { max-width: var(--prose-width); }
+.prose { max-width: var(--prose-width); overflow-wrap: break-word; }
+.prose p, .prose li { overflow-wrap: anywhere; }
 .prose h1 { margin-top: var(--space-6); }
 
 @media (prefers-reduced-motion: reduce) {

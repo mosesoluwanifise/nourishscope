@@ -58,7 +58,7 @@ describe('worked example: Magoffin, Owsley and Wolfe, need-only mode', () => {
     const result = runStrategy(communities, B, strategy);
     expect(result.rows.map((r) => r.allocation)).toEqual(allocations);
     expect(result.rows.map((r) => r.reached)).toEqual(reached);
-    expect(result.totals.reached).toBe(reached.reduce((a, b) => a + b, 0));
+    expect(result.totals.reached).toBe(reached.reduce<number>((a, b) => a + b, 0));
     expect(result.totals.unspent).toBe(unspent);
     expect(result.totals.coverageBefore).toBeNull();
     expect(result.totals.coverageAfter).toBeNull();

@@ -2,6 +2,7 @@ import { TERM_COPY } from '../../lib/copy';
 import { formatInt } from '../../lib/format';
 import type { Derived, PlanState } from './state';
 import Field from './Field';
+import TableWrap from '../TableWrap';
 
 interface Props {
   state: PlanState;
@@ -52,7 +53,7 @@ export default function Inputs({ state, derived, setBudget, setCost, setCostConf
           <p class="field__hint">
             {editable ? `${TERM_COPY.need.explain} ${TERM_COPY.served.explain}` : 'These figures come from your file. To change them, edit the file and upload it again.'}
           </p>
-          <div class="table-wrap">
+          <TableWrap label="Households by community">
             <table>
               <caption class="visually-hidden">Households in need and served by community</caption>
               <thead>
@@ -92,7 +93,7 @@ export default function Inputs({ state, derived, setBudget, setCost, setCostConf
                 })}
               </tbody>
             </table>
-          </div>
+          </TableWrap>
         </details>
       )}
     </div>

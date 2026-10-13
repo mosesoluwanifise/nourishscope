@@ -1,13 +1,14 @@
 ---
 /** Every public field with its source and year, generated from the workbook (plan R17). */
 import { FIELDS } from '../lib/data/load';
+import TableWrap from './TableWrap';
 
 const PILLAR_ORDER = ['Identifiers', 'Nutrition need', 'Community health', 'Food system'];
 const fields = FIELDS.filter((f) => f.public).sort(
   (a, b) => PILLAR_ORDER.indexOf(a.pillar) - PILLAR_ORDER.indexOf(b.pillar),
 );
 ---
-<div class="table-wrap">
+<TableWrap label="Fields in the Kentucky county dataset">
   <table>
     <caption>Fields in the Kentucky county dataset</caption>
     <thead>
@@ -29,4 +30,4 @@ const fields = FIELDS.filter((f) => f.public).sort(
       ))}
     </tbody>
   </table>
-</div>
+</TableWrap>
