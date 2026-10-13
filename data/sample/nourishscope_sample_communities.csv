@@ -1,0 +1,7 @@
+community_name,county,fips,number_of_households_in_need,number_of_households_served,cost_per_household,diabetes_pct,obesity_pct,high_bp_pct,low_income_low_access_pct
+Sample: Pine Hollow (fictional),Bell County,21013,900,220,95,,,,
+Sample: River Bend (fictional),Pike County,21195,1500,400,120,,,,
+Sample: Cedar Flats (fictional),Christian County,21047,1100,300,105,,,,
+Sample: Maple Crossing (fictional),Fayette County,21067,2200,850,130,,,,
+Sample: Laurel Springs (fictional),Laurel County,21125,1300,350,100,,,,
+Sample: Green Meadow (fictional),Warren County,21227,1000,260,115,,,,

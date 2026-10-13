@@ -9,9 +9,13 @@
     "node": ">=22.12.0"
   },
   "scripts": {
+    "build-data": "tsx scripts/build-data.ts",
+    "predev": "npm run build-data",
     "dev": "astro dev",
+    "prebuild": "npm run build-data",
     "build": "astro build",
     "preview": "astro preview",
+    "pretest": "npm run build-data",
     "test": "vitest run",
     "test:watch": "vitest"
   },
