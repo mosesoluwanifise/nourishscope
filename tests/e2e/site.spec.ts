@@ -144,3 +144,28 @@ test('/app ships a no-JavaScript message with working links', async ({ request }
   expect(noscript).toContain('read <a href="/nourishscope/methodology">');
   expect(noscript).toContain('href="/nourishscope/downloads/nourishscope_upload_template.csv"');
 });
+
+test.describe('Data Sources and About', () => {
+  test('sources are cards with descriptive link text, and the field table starts collapsed', async ({ page }) => {
+    await page.goto('data-sources');
+    const cards = page.locator('.source-card');
+    await expect(cards).toHaveCount(5);
+    for (const text of await cards.locator('a').allInnerTexts()) {
+      expect(text).toMatch(/^View this source on [a-z.]+$/);
+    }
+    const table = page.locator('.field-table table');
+    await expect(table).toBeHidden();
+    await page.getByText('Every field, with its source and year').click();
+    await expect(table.locator('tbody tr')).toHaveCount(19);
+  });
+
+  for (const width of [1280, 375]) {
+    test(`the About photo is at most 240px wide at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('about');
+      const img = page.getByRole('img', { name: /Portrait of Yetunde/ });
+      await expect(img).toBeVisible();
+      expect((await img.boundingBox())!.width).toBeLessThanOrEqual(240);
+    });
+  }
+});
