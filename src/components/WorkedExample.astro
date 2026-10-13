@@ -1,0 +1,79 @@
+---
+/**
+ * The spec's worked example, computed by the real engine at build time and
+ * shipped as static HTML (plan R17). No JavaScript on the Home page.
+ */
+import { prepareCommunities, runStrategy, STRATEGIES, isFlagged } from '../lib/calc';
+import { COUNTIES, STATE_MEDIANS } from '../lib/data/load';
+import { STRATEGY_COPY } from '../lib/copy';
+import { formatCurrency, formatInt } from '../lib/format';
+import SourceLabel from './SourceLabel';
+
+const BUDGET = 50000;
+const COST = 100;
+const names = ['Magoffin County', 'Owsley County', 'Wolfe County'];
+const counties = names.map((n) => COUNTIES.find((c) => c.county_name === n)!);
+const prepared = prepareCommunities(
+  counties.map((c) => ({
+    id: c.fips,
+    name: c.county_name,
+    need: c.snap_households,
+    served: null,
+    cost: COST,
+    health: { diabetes_pct: c.diabetes_pct, obesity_pct: c.obesity_pct, high_bp_pct: c.high_bp_pct },
+    flagged: isFlagged(c),
+  })),
+  STATE_MEDIANS,
+);
+const results = STRATEGIES.map((s) => runStrategy(prepared, BUDGET, s));
+const proportional = results[STRATEGIES.indexOf('proportional')];
+---
+<section class="worked-example" aria-labelledby="example-heading">
+  <h2 id="example-heading">A worked example with real Kentucky data</h2>
+  <p>
+    Suppose a program has <strong>{formatCurrency(BUDGET)}</strong> to serve three eastern Kentucky counties, all rated
+    Distressed by the Appalachian Regional Commission. Need is the number of households receiving SNAP, and the cost per
+    household is an example value of {formatCurrency(COST)}.
+  </p>
+  <div class="table-wrap">
+    <table>
+      <caption>Sharing {formatCurrency(BUDGET)} by unmet need</caption>
+      <thead>
+        <tr>
+          <th scope="col">County</th>
+          <th scope="col" class="num">Households in need<SourceLabel field="snap_households" /></th>
+          <th scope="col" class="num">Health burden score<SourceLabel field="diabetes_pct" /></th>
+          <th scope="col" class="num">Allocation</th>
+          <th scope="col" class="num">Households reached</th>
+        </tr>
+      </thead>
+      <tbody>
+        {prepared.map((c, i) => (
+          <tr>
+            <th scope="row">{c.name}</th>
+            <td class="num">{formatInt(c.need)}</td>
+            <td class="num">{c.H.toFixed(2)}</td>
+            <td class="num">{formatCurrency(proportional.rows[i].allocation)}</td>
+            <td class="num">{formatInt(proportional.rows[i].reached)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p>The same budget, divided the five ways the tool compares:</p>
+  <div class="table-wrap">
+    <table>
+      <caption>Households reached by strategy</caption>
+      <thead><tr><th scope="col">Strategy</th><th scope="col" class="num">Households reached</th><th scope="col" class="num">Unspent</th></tr></thead>
+      <tbody>
+        {results.map((r) => (
+          <tr><th scope="row">{STRATEGY_COPY[r.strategy].name}</th><td class="num">{formatInt(r.totals.reached)}</td><td class="num">{formatCurrency(r.totals.unspent)}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="source-label">
+    Health burden score: diabetes, obesity and high blood pressure compared with the Kentucky middle (CDC PLACES, 2021–2022).
+    Calculated with NourishScope Methodology 1.0.
+  </p>
+</section>

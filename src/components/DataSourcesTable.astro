@@ -1,0 +1,32 @@
+---
+/** Every public field with its source and year, generated from the workbook (plan R17). */
+import { FIELDS } from '../lib/data/load';
+
+const PILLAR_ORDER = ['Identifiers', 'Nutrition need', 'Community health', 'Food system'];
+const fields = FIELDS.filter((f) => f.public).sort(
+  (a, b) => PILLAR_ORDER.indexOf(a.pillar) - PILLAR_ORDER.indexOf(b.pillar),
+);
+---
+<div class="table-wrap">
+  <table>
+    <caption>Fields in the Kentucky county dataset</caption>
+    <thead>
+      <tr>
+        <th scope="col">Field</th>
+        <th scope="col">What it measures</th>
+        <th scope="col">Source</th>
+        <th scope="col">Year</th>
+      </tr>
+    </thead>
+    <tbody>
+      {fields.map((f) => (
+        <tr>
+          <th scope="row"><code>{f.field}</code></th>
+          <td>{f.description}</td>
+          <td>{f.source_label}</td>
+          <td>{f.data_year}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

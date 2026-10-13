@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { METHODOLOGY_VERSION, TOOL_VERSION, withBase } from '../config/site';
+import { STRATEGY_COPY, TERM_COPY } from '../lib/copy';
+import { STATE_MEDIANS } from '../lib/data/load';
+import { formatPct } from '../lib/format';
+---
+<BaseLayout title="Methodology" description="How NourishScope turns public data and your inputs into budget allocations: formulas, defaults, assumptions and limitations.">
+  <article class="prose">
+    <h1>Methodology</h1>
+    <p>
+      This page explains every calculation in NourishScope, version {TOOL_VERSION}, Methodology {METHODOLOGY_VERSION}.
+      It follows the NourishScope Calculation Specification written by the founder, Yetunde Khadijat Olaogun.
+      All calculations run in your browser.
+    </p>
+
+    <nav aria-label="On this page">
+      <ul>
+        <li><a href="#data">1. Data the tool combines</a></li>
+        <li><a href="#inputs">2. Inputs and defaults</a></li>
+        <li><a href="#core">3. Core measures</a></li>
+        <li><a href="#strategies">4. The five strategies</a></li>
+        <li><a href="#results">5. Results</a></li>
+        <li><a href="#sensitivity">6. Cost sensitivity</a></li>
+        <li><a href="#equity">7. Equity flags</a></li>
+        <li><a href="#evaluation">8. Evaluation module</a></li>
+        <li><a href="#differences">9. Where the tool differs from the specification</a></li>
+        <li><a href="#limitations">10. Assumptions and limitations</a></li>
+      </ul>
+    </nav>
+
+    <h2 id="data">1. Data the tool combines</h2>
+    <ul>
+      <li><strong>Kentucky public data (default).</strong> All 120 counties, compiled from the U.S. Census Bureau, CDC PLACES, the USDA Economic Research Service Food Environment Atlas and the Appalachian Regional Commission. See <a href={withBase('/data-sources')}>Data Sources</a>.</li>
+      <li><strong>Sample data.</strong> Six fictional communities, always labelled “Sample data”.</li>
+      <li><strong>Your upload.</strong> A CSV in the <a href={withBase('/downloads/nourishscope_upload_template.csv')}>template</a> format. Each row is matched to a Kentucky county by FIPS code, or by county name. Where you fill in a value, it replaces the public value for that field only; every other field keeps the public data.</li>
+    </ul>
+
+    <h2 id="inputs">2. Inputs and defaults</h2>
+    <dl>
+      <dt>{TERM_COPY.need.name}</dt>
+      <dd>For Kentucky county data this starts as the number of households receiving SNAP (Census ACS 5-year, 2020–2024). You may replace it. Required, a whole number of 0 or more.</dd>
+      <dt>{TERM_COPY.served.name}</dt>
+      <dd>No public default; blank unless you enter it. A whole number of 0 or more. If it is more than households in need, the tool warns you and sets households still needing help to 0.</dd>
+      <dt>Cost per household</dt>
+      <dd>Required. Pre-filled with $100, labelled “Example only – replace with your program’s cost”. One value for all communities, unless your upload gives a cost for a community. The planning brief cannot be saved until you confirm or change the cost.</dd>
+      <dt>Budget (B)</dt>
+      <dd>Required, more than $0.</dd>
+      <dt>{TERM_COPY.floorShare.name}</dt>
+      <dd>Used by “{STRATEGY_COPY.need_floor.name}”. Default 5%.</dd>
+      <dt>Health measures</dt>
+      <dd>Diabetes, obesity and high blood pressure for each county (CDC PLACES, age-adjusted adult prevalence). Optional in uploads.</dd>
+    </dl>
+    <p>Values that are negative or not numbers are rejected with a message naming the row and field. “-9999”, empty cells and “Not reported” are treated as missing, never as zero.</p>
+
+    <h2 id="core">3. Core measures for each community</h2>
+    <ul>
+      <li><strong>{TERM_COPY.unmet.name} (U)</strong> = the larger of (households in need − households served) and 0. If households served is blank, U equals households in need and the tool runs in “need-only” mode.</li>
+      <li><strong>Coverage</strong> is shown only when households served is entered for every selected community: total served ÷ total in need × 100. In need-only mode the tool shows “—” and asks you to enter households served.</li>
+      <li><strong>{TERM_COPY.healthIndex.name} (H)</strong> = the average of (county rate ÷ Kentucky median) across the available health measures, or 1.0 if none are available. The Kentucky medians are fixed from all 120 counties: diabetes {formatPct(STATE_MEDIANS.diabetes_pct)}, obesity {formatPct(STATE_MEDIANS.obesity_pct)}, high blood pressure {formatPct(STATE_MEDIANS.high_bp_pct)}.</li>
+    </ul>
+
+    <h2 id="strategies">4. The five strategies</h2>
+    <p>For n selected communities and budget B. If the total of U (or W) is 0, the tool falls back to an equal split. Each allocation is rounded to the cent.</p>
+    <h3 id={STRATEGY_COPY.equal.anchor}>{STRATEGY_COPY.equal.name}</h3>
+    <p>{STRATEGY_COPY.equal.explain} Allocation = B ÷ n.</p>
+    <h3 id={STRATEGY_COPY.proportional.anchor}>{STRATEGY_COPY.proportional.name}</h3>
+    <p>{STRATEGY_COPY.proportional.explain} Allocation = B × U ÷ (total U).</p>
+    <h3 id={STRATEGY_COPY.need_floor.anchor}>{STRATEGY_COPY.need_floor.name}</h3>
+    <p>{STRATEGY_COPY.need_floor.explain} Floor F = floor share × B ÷ n. Allocation = F + (B − n × F) × U ÷ (total U).</p>
+    <h3 id={STRATEGY_COPY.health_weighted.anchor}>{STRATEGY_COPY.health_weighted.name}</h3>
+    <p>{STRATEGY_COPY.health_weighted.explain} Weight W = U × H. Allocation = B × W ÷ (total W).</p>
+    <h3 id={STRATEGY_COPY.cost_effectiveness.anchor}>{STRATEGY_COPY.cost_effectiveness.name}</h3>
+    <p>
+      {STRATEGY_COPY.cost_effectiveness.explain} Communities are sorted by cost per household, lowest first; ties go to the
+      higher health burden score, then to more households still needing help. Each gets the smaller of the remaining
+      budget and U × cost, until the budget is used.
+    </p>
+
+    <h2 id="results">5. Results for each community and in total</h2>
+    <ul>
+      <li><strong>Households reached</strong> = the smaller of (allocation ÷ cost, rounded down) and U. A partly funded household is not counted.</li>
+      <li><strong>Spend</strong> = households reached × cost. <strong>Unspent</strong> = B − total spend. Version 1.0 reports unspent money; it does not move it to other communities.</li>
+      <li><strong>Coverage after</strong> (when households served is entered for every community) = (total served + total reached) ÷ total in need × 100.</li>
+    </ul>
+
+    <h2 id="sensitivity">6. Cost sensitivity</h2>
+    <p>The tool repeats the allocation and results with every cost multiplied by 0.8 and by 1.2, keeping the budget the same, and shows households reached and unspent for −20%, as entered, and +20%.</p>
+
+    <h2 id="equity">7. Equity flags</h2>
+    <p>
+      A community is flagged as <strong>{TERM_COPY.equityFlag.name.toLowerCase()}</strong> if its county’s Appalachian Regional
+      Commission status for fiscal year 2027 is Distressed or At-Risk, or its county is nonmetro (USDA ERS, 2023). The tool
+      reports the share of the budget, and of households reached, that goes to flagged communities.
+    </p>
+
+    <h2 id="evaluation">8. Evaluation module</h2>
+    <ul>
+      <li><strong>Change</strong> = post % − pre %, in percentage points.</li>
+      <li><strong>Participants improving</strong> = participants × change ÷ 100.</li>
+      <li><strong>Cost per participant improving</strong> = program cost ÷ participants improving. Not shown when no participants improved.</li>
+    </ul>
+
+    <h2 id="differences">9. Where the tool differs from the specification</h2>
+    <ul>
+      <li><strong>Unmatched upload rows are flagged, not added.</strong> NourishScope covers Kentucky only, so a row that does not match a Kentucky county is shown for you to fix (choose the county, or correct the file) rather than added as a new community without public data.</li>
+      <li><strong>County names are matched with leeway.</strong> Case, spacing, punctuation and a trailing “County” or “Co.” are ignored, so “Adair”, “adair county” and “ADAIR CO.” all match Adair County. A FIPS code that disagrees with the county name is flagged.</li>
+      <li><strong>Upload column names.</strong> The template uses <code>number_of_households_in_need</code> and <code>number_of_households_served</code>; <code>households_in_need</code> and <code>households_served</code> are also accepted.</li>
+      <li><strong>A blank need in an upload is flagged.</strong> The SNAP-households default applies only to Kentucky county data, so two uploaded communities in one county never both inherit the county’s full count.</li>
+    </ul>
+
+    <h2 id="limitations">10. Assumptions and limitations</h2>
+    <ul>
+      <li>SNAP households estimate need. They are not a count of households eligible for, or interested in, your program.</li>
+      <li>Health and food-access figures describe the whole county, not your participants.</li>
+      <li>Public figures come from different years (2018 to 2024). Each figure in the tool shows its source and year.</li>
+      <li>CDC PLACES 2024 release is used because the 2025 release does not include these measures for Kentucky.</li>
+      <li>USDA does not report grocery stores per 1,000 residents for 42 small counties; the tool shows “Not reported (suppressed by source)” for those, never zero.</li>
+      <li>Results support a decision; they do not replace local knowledge of your communities.</li>
+    </ul>
+  </article>
+</BaseLayout>
