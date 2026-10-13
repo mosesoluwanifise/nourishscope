@@ -1,30 +1,33 @@
 /** Evaluation module (spec step 8). Separate from the planning flow. */
 import { useState } from 'preact/hooks';
-import { evaluate } from '../../lib/calc';
+import { evaluate, isPositive } from '../../lib/calc';
 import { formatCurrency, formatDecimal1, formatPoints } from '../../lib/format';
 import { parseNumberInput } from './state';
 import Field from './Field';
 
 type Key = 'pre' | 'post' | 'participants' | 'cost';
+const KEYS: Key[] = ['pre', 'post', 'participants', 'cost'];
 
-function check(key: Key, text: string): string | undefined {
-  const v = parseNumberInput(text);
-  if (v === null) return undefined;
+function errorFor(key: Key, v: number): string | undefined {
   if (key === 'pre' || key === 'post') {
     return Number.isFinite(v) && v >= 0 && v <= 100 ? undefined : 'Enter a percentage between 0 and 100.';
   }
   if (key === 'participants') {
     return Number.isInteger(v) && v > 0 ? undefined : 'Enter a whole number of participants, more than 0.';
   }
-  return Number.isFinite(v) && v > 0 ? undefined : 'Enter a program cost of more than $0.';
+  return isPositive(v) ? undefined : 'Enter a program cost of more than $0.';
 }
 
 export default function Evaluation() {
   const [values, setValues] = useState<Record<Key, string>>({ pre: '', post: '', participants: '', cost: '' });
   const set = (key: Key) => (v: string) => setValues((s) => ({ ...s, [key]: v }));
-  const errors = Object.fromEntries((Object.keys(values) as Key[]).map((k) => [k, check(k, values[k])])) as Record<Key, string | undefined>;
-  const numbers = Object.fromEntries((Object.keys(values) as Key[]).map((k) => [k, parseNumberInput(values[k])])) as Record<Key, number | null>;
-  const complete = (Object.keys(values) as Key[]).every((k) => numbers[k] !== null && !errors[k]);
+  const numbers = {} as Record<Key, number | null>;
+  const errors = {} as Record<Key, string | undefined>;
+  for (const k of KEYS) {
+    numbers[k] = parseNumberInput(values[k]);
+    errors[k] = numbers[k] === null ? undefined : errorFor(k, numbers[k]!);
+  }
+  const complete = KEYS.every((k) => numbers[k] !== null && !errors[k]);
   const result = complete
     ? evaluate({ prePct: numbers.pre!, postPct: numbers.post!, participants: numbers.participants!, programCost: numbers.cost! })
     : null;

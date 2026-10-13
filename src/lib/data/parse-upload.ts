@@ -3,14 +3,12 @@
  * recognised columns are kept; anything else in the file is discarded.
  */
 import Papa from 'papaparse';
-import { HEALTH_MEASURES, type HealthValues } from '../calc/types';
+import { HEALTH_MEASURES, type HealthMeasure, type HealthValues } from '../calc/types';
 
 export const MAX_UPLOAD_BYTES = 1024 * 1024;
 export const MAX_UPLOAD_ROWS = 2000;
 
-type Column =
-  | 'communityName' | 'county' | 'fips' | 'need' | 'served' | 'cost' | 'lila'
-  | (typeof HEALTH_MEASURES)[number];
+type Column = 'communityName' | 'county' | 'fips' | 'need' | 'served' | 'cost' | 'lila' | HealthMeasure;
 
 /** Header spellings accepted for each column (template and spec names). */
 const HEADER_ALIASES: Record<string, Column> = {
@@ -30,15 +28,14 @@ const HEADER_ALIASES: Record<string, Column> = {
   low_income_low_access_pct: 'lila',
 };
 
-const FIELD_LABELS: Record<'need' | 'served' | 'cost' | 'pct', string> = {
+const FIELD_LABELS: Record<'need' | 'served' | 'cost', string> = {
   need: 'Number of households in need',
   served: 'Number of households served',
   cost: 'Cost per household',
-  pct: 'Percentage',
 };
 
 export interface RowIssue {
-  field: 'need' | 'served' | 'cost' | (typeof HEALTH_MEASURES)[number] | 'low_income_low_access_pct';
+  field: 'need' | 'served' | 'cost' | HealthMeasure | 'low_income_low_access_pct';
   message: string;
 }
 

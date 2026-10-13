@@ -4,7 +4,7 @@
  */
 import { isFlagged } from '../calc/equity';
 import { HEALTH_MEASURES, type CommunityInput, type HealthValues } from '../calc/types';
-import { matchCounty, type MatchResult } from './match';
+import { countyIndex, matchCounty, type MatchResult } from './match';
 import type { UploadRow } from './parse-upload';
 import type { County } from './types';
 
@@ -13,12 +13,15 @@ export const EXAMPLE_COST = 100;
 
 export type DataSource = 'kentucky' | 'sample' | 'upload';
 
+/** 'user' means the person replaced a county's SNAP default in the app. */
+export type NeedSource = 'snap' | 'user' | 'upload';
+
 export interface AssembledCommunity {
   input: CommunityInput;
   county: County;
   source: DataSource;
   /** Where "number of households in need" came from, for the planning brief. */
-  needSource: 'snap' | 'upload';
+  needSource: NeedSource;
   costFromUpload: boolean;
   /** Public fields the upload replaced (spec section 1). */
   overrides: string[];
@@ -42,8 +45,9 @@ export function assembleFromCounties(
   counties: readonly County[],
   globalCost: number,
 ): AssembledCommunity[] {
+  const { byFips } = countyIndex(counties);
   return fipsList
-    .map((fips) => counties.find((c) => c.fips === fips))
+    .map((fips) => byFips.get(fips))
     .filter((c): c is County => Boolean(c))
     .map((county) => ({
       input: {
@@ -57,7 +61,7 @@ export function assembleFromCounties(
       },
       county,
       source: 'kentucky' as const,
-      needSource: 'snap' as const,
+      needSource: 'snap' as NeedSource,
       costFromUpload: false,
       overrides: [],
       lowIncomeLowAccessPct: county.low_income_low_access_pct,
@@ -81,13 +85,14 @@ export function assembleFromUpload(
 ): { communities: AssembledCommunity[]; flagged: FlaggedRow[] } {
   const communities: AssembledCommunity[] = [];
   const flagged: FlaggedRow[] = [];
+  const { byFips } = countyIndex(counties);
 
   for (const row of rows) {
     const fix = countyFixes[row.rowNumber];
     const match: MatchResult = fix ? { status: 'matched', fips: fix } : matchCounty(row, counties);
     const problems = row.issues.map((i) => i.message);
     if (match.status === 'flagged') problems.unshift(match.message);
-    const county = match.status === 'matched' ? counties.find((c) => c.fips === match.fips) : undefined;
+    const county = match.status === 'matched' ? byFips.get(match.fips) : undefined;
 
     if (!county || problems.length || row.need === null) {
       flagged.push({ row, match, problems });

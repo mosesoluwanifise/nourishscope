@@ -8,6 +8,8 @@ interface Props {
   onChange: (update: (previous: string[]) => string[]) => void;
 }
 
+const FLAGGED = new Set(COUNTIES.filter(isFlagged).map((c) => c.fips));
+
 /** Keep the selection in county (FIPS) order. */
 const inCountyOrder = (fips: Set<string>) => COUNTIES.filter((c) => fips.has(c.fips)).map((c) => c.fips);
 
@@ -22,7 +24,7 @@ export default function CountySelector({ selected, onChange }: Props) {
     return COUNTIES.filter((c) =>
       (!q || c.county_name.toLowerCase().includes(q))
       && (!appalachianOnly || c.appalachian === 'Yes')
-      && (!flaggedOnly || isFlagged(c)));
+      && (!flaggedOnly || FLAGGED.has(c.fips)));
   }, [query, appalachianOnly, flaggedOnly]);
 
   const toggle = (fips: string) => onChange((previous) => {
@@ -63,7 +65,7 @@ export default function CountySelector({ selected, onChange }: Props) {
               <label class="checkbox">
                 <input type="checkbox" checked={selectedSet.has(c.fips)} onChange={() => toggle(c.fips)} />
                 {c.county_name}
-                {isFlagged(c) && <span class="badge">Rural or distressed</span>}
+                {FLAGGED.has(c.fips) && <span class="badge">Rural or distressed</span>}
               </label>
             </li>
           ))}

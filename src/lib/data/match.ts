@@ -30,17 +30,43 @@ export function normaliseFips(raw: string): string | null {
   return digits.padStart(5, '0');
 }
 
+interface CountyIndex {
+  byFips: Map<string, County>;
+  byKey: Map<string, County>;
+}
+
+const indexes = new WeakMap<readonly County[], CountyIndex>();
+
+/**
+ * Lookup maps for a county list, built once per list. Matching runs on every
+ * keystroke for up to 2,000 upload rows, so per-row linear scans add up.
+ * First entry wins, as Array.prototype.find would.
+ */
+export function countyIndex(counties: readonly County[]): CountyIndex {
+  let index = indexes.get(counties);
+  if (!index) {
+    index = { byFips: new Map(), byKey: new Map() };
+    for (const c of counties) {
+      if (!index.byFips.has(c.fips)) index.byFips.set(c.fips, c);
+      const key = countyNameKey(c.county_name);
+      if (!index.byKey.has(key)) index.byKey.set(key, c);
+    }
+    indexes.set(counties, index);
+  }
+  return index;
+}
+
 export function matchCounty(
   row: { county: string | null; fips: string | null },
   counties: readonly County[],
 ): MatchResult {
   const name = row.county?.trim() ?? '';
   const fipsText = row.fips?.trim() ?? '';
-  const byKey = (key: string) => counties.find((c) => countyNameKey(c.county_name) === key);
+  const { byFips, byKey } = countyIndex(counties);
 
   if (fipsText) {
     const fips = normaliseFips(fipsText);
-    const county = fips ? counties.find((c) => c.fips === fips) : undefined;
+    const county = fips ? byFips.get(fips) : undefined;
     if (!county) {
       return { status: 'flagged', reason: 'fips_not_found', message: `FIPS code "${fipsText}" is not a Kentucky county.` };
     }
@@ -55,7 +81,7 @@ export function matchCounty(
   }
 
   if (name) {
-    const county = byKey(countyNameKey(name));
+    const county = byKey.get(countyNameKey(name));
     if (county) return { status: 'matched', fips: county.fips };
     return { status: 'flagged', reason: 'county_not_recognised', message: `"${name}" is not a Kentucky county we recognise.` };
   }

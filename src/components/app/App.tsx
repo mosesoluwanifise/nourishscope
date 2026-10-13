@@ -42,9 +42,15 @@ const SECTIONS = [
   ['export', 'Save or export'],
 ] as const;
 
+function currentSourceLabel(state: PlanState): string | null {
+  if (state.source === 'sample') return SAMPLE_DATA_TEXT;
+  if (state.source === 'kentucky') return 'Kentucky county data';
+  if (state.source === 'upload') return state.upload ? `Your file: ${state.upload.fileName}` : 'Your file';
+  return null;
+}
+
 export default function App() {
   const [state, setState] = useState<PlanState>(INITIAL_STATE);
-  const [parsing, setParsing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const derived = useMemo(() => derive(state, SAMPLE_ROWS), [state]);
@@ -92,9 +98,7 @@ export default function App() {
     setState((s) => withSource(s, source));
   };
 
-  const sourceLabel = state.source === 'sample' ? SAMPLE_DATA_TEXT
-    : state.source === 'upload' ? `Your file${state.upload ? `: ${state.upload.fileName}` : ''}`
-    : state.source === 'kentucky' ? 'Kentucky county data' : null;
+  const sourceLabel = currentSourceLabel(state);
 
   return (
     <div class="planner">
@@ -108,8 +112,6 @@ export default function App() {
               upload={state.upload}
               communities={derived.communities}
               flagged={derived.flagged}
-              parsing={parsing}
-              setParsing={setParsing}
               onUpload={(upload) => update({ upload })}
               onFix={(row, fips) => setState((s) => s.upload
                 ? { ...s, upload: { ...s.upload, countyFixes: { ...s.upload.countyFixes, [row]: fips } } }

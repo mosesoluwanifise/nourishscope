@@ -3,27 +3,20 @@
  * The spec's worked example, computed by the real engine at build time and
  * shipped as static HTML (plan R17). No JavaScript on the Home page.
  */
-import { prepareCommunities, runStrategy, STRATEGIES, isFlagged } from '../lib/calc';
+import { prepareCommunities, runStrategy, STRATEGIES } from '../lib/calc';
 import { COUNTIES, STATE_MEDIANS } from '../lib/data/load';
+import { assembleFromCounties, EXAMPLE_COST } from '../lib/data/merge';
 import { STRATEGY_COPY } from '../lib/copy';
 import { formatCurrency, formatInt } from '../lib/format';
 import SourceLabel from './SourceLabel';
 import TableWrap from './TableWrap';
 
 const BUDGET = 50000;
-const COST = 100;
+const COST = EXAMPLE_COST;
 const names = ['Magoffin County', 'Owsley County', 'Wolfe County'];
-const counties = names.map((n) => COUNTIES.find((c) => c.county_name === n)!);
+const fipsList = names.map((n) => COUNTIES.find((c) => c.county_name === n)!.fips);
 const prepared = prepareCommunities(
-  counties.map((c) => ({
-    id: c.fips,
-    name: c.county_name,
-    need: c.snap_households,
-    served: null,
-    cost: COST,
-    health: { diabetes_pct: c.diabetes_pct, obesity_pct: c.obesity_pct, high_bp_pct: c.high_bp_pct },
-    flagged: isFlagged(c),
-  })),
+  assembleFromCounties(fipsList, COUNTIES, COST).map((c) => c.input),
   STATE_MEDIANS,
 );
 const results = STRATEGIES.map((s) => runStrategy(prepared, BUDGET, s));

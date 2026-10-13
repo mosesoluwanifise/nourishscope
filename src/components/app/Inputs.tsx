@@ -18,7 +18,10 @@ interface Props {
 export default function Inputs({ state, derived, setBudget, setCost, setCostConfirmed, setFloor, setNeed, setServed }: Props) {
   const { errors, warnings, communities } = derived;
   const editable = state.source === 'kentucky';
-  const costFromUploadForAll = communities.length > 0 && communities.every((c) => c.costFromUpload);
+  const { costFromUploadForAll } = derived;
+  let costHint: string = TERM_COPY.cost.explain;
+  if (costFromUploadForAll) costHint = 'Every community has its own cost from your file; this value is not used.';
+  else if (!state.costConfirmed) costHint = 'Example only – replace with your program’s cost.';
 
   return (
     <div class="inputs">
@@ -27,11 +30,7 @@ export default function Inputs({ state, derived, setBudget, setCost, setCostConf
 
       <div class="field-group">
         <Field id="cost" label={TERM_COPY.cost.name} prefix="$" value={state.costText} onInput={setCost}
-          hint={costFromUploadForAll
-            ? 'Every community has its own cost from your file; this value is not used.'
-            : state.costConfirmed
-              ? TERM_COPY.cost.explain
-              : 'Example only – replace with your program’s cost.'}
+          hint={costHint}
           error={errors.cost} />
         {!costFromUploadForAll && (
           <label class="checkbox">

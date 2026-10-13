@@ -12,4 +12,4 @@ export { runStrategy } from './results';
 export { sensitivity, SENSITIVITY_FACTORS, type SensitivityLevel } from './sensitivity';
 export { isFlagged, equityShares, type EquityShares } from './equity';
 export { evaluate, type EvaluationInput, type EvaluationResult } from './evaluation';
-export { validateInputs, type InputIssue, type ValidationResult } from './validate';
+export { validateInputs, isPositive, isWholeNonNegative, type InputIssue, type ValidationResult } from './validate';

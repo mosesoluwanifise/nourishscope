@@ -18,9 +18,11 @@ interface Props {
   setStrategy: (s: Strategy) => void;
 }
 
+type StrategyProps = Omit<Props, 'setStrategy'>;
+
 const methodologyLink = (anchor: string) => withBase(`/methodology#${anchor}`);
 
-export function NutritionModule({ derived, strategy }: Omit<Props, 'setStrategy'>) {
+export function NutritionModule({ derived, strategy }: StrategyProps) {
   const index = STRATEGIES.indexOf(strategy);
   const result = derived.results![index];
   const { prepared, communities } = derived;
@@ -261,7 +263,7 @@ export function StrategyComparison({ derived, strategy, setStrategy }: Props) {
   );
 }
 
-export function SensitivityPanel({ derived, strategy }: Omit<Props, 'setStrategy'>) {
+export function SensitivityPanel({ derived, strategy }: StrategyProps) {
   const levels = derived.sensitivity!;
   const label = (f: number) => (f === 1 ? 'Cost as entered' : `Cost ${f < 1 ? '20% lower' : '20% higher'}`);
   return (
@@ -287,7 +289,7 @@ export function SensitivityPanel({ derived, strategy }: Omit<Props, 'setStrategy
   );
 }
 
-export function EquityPanel({ derived, strategy }: Omit<Props, 'setStrategy'>) {
+export function EquityPanel({ derived, strategy }: StrategyProps) {
   const shares = derived.equity![STRATEGIES.indexOf(strategy)];
   const total = derived.prepared.length;
   return (

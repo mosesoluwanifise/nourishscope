@@ -2,8 +2,8 @@
  * Upload a CSV and fix flagged rows (plan R22). Focus moves to the upload
  * summary after parsing, and to the next unresolved row after a fix.
  */
-import { useEffect, useRef } from 'preact/hooks';
-import { withBase } from '../../config/site';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { UPLOAD_TEMPLATE_PATH, withBase } from '../../config/site';
 import { COUNTIES } from '../../lib/data/load';
 import type { AssembledCommunity, FlaggedRow } from '../../lib/data/merge';
 import { MAX_UPLOAD_BYTES, parseUpload } from '../../lib/data/parse-upload';
@@ -16,11 +16,10 @@ interface Props {
   onUpload: (upload: UploadState) => void;
   onFix: (rowNumber: number, fips: string) => void;
   onContinue: () => void;
-  parsing: boolean;
-  setParsing: (v: boolean) => void;
 }
 
-export default function UploadPanel({ upload, communities, flagged, onUpload, onFix, onContinue, parsing, setParsing }: Props) {
+export default function UploadPanel({ upload, communities, flagged, onUpload, onFix, onContinue }: Props) {
+  const [parsing, setParsing] = useState(false);
   const summaryRef = useRef<HTMLHeadingElement>(null);
   const matchedRef = useRef<HTMLHeadingElement>(null);
   const focusAfterFix = useRef<number | null>(null);
@@ -60,7 +59,7 @@ export default function UploadPanel({ upload, communities, flagged, onUpload, on
       <div class="field">
         <label for="upload-file">Your CSV file</label>
         <p id="upload-file-hint" class="field__hint">
-          Use the <a href={withBase('/downloads/nourishscope_upload_template.csv')} download>template</a>: one row per community,
+          Use the <a href={withBase(UPLOAD_TEMPLATE_PATH)} download>template</a>: one row per community,
           with its county or FIPS code and the number of households in need. Files up to 1 MB.
         </p>
         <input id="upload-file" type="file" accept=".csv,text/csv" aria-describedby="upload-file-hint" onChange={onFile} />
@@ -77,7 +76,7 @@ export default function UploadPanel({ upload, communities, flagged, onUpload, on
           {upload.parsed.fileErrors.length > 0 && (
             <div class="callout callout--error">
               <ul>{upload.parsed.fileErrors.map((e) => <li key={e}>{e}</li>)}</ul>
-              <p><a href={withBase('/downloads/nourishscope_upload_template.csv')} download>Download the template</a> to compare columns.</p>
+              <p><a href={withBase(UPLOAD_TEMPLATE_PATH)} download>Download the template</a> to compare columns.</p>
             </div>
           )}
 

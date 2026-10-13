@@ -9,7 +9,3 @@ export const FIELDS = fieldsJson as FieldInfo[];
 
 /** Fixed from all 120 counties (spec step 2), never from a selection. */
 export const STATE_MEDIANS = stateMedians(COUNTIES);
-
-export function countyByFips(fips: string): County | undefined {
-  return COUNTIES.find((c) => c.fips === fips);
-}

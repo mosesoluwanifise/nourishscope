@@ -3,6 +3,7 @@
  * read this one object, so they cannot drift apart.
  */
 import type { Derived, PlanState } from '../../components/app/state';
+import type { EquityShares, ResultTotals } from '../calc';
 import { STRATEGY_COPY } from '../copy';
 import { METHODOLOGY_VERSION, TOOL_VERSION } from '../../config/site';
 import { FIELDS } from '../data/load';
@@ -34,10 +35,10 @@ export interface Brief {
   inputs: { budget: number; cost: number; floorSharePct: number; costConfirmed: boolean };
   strategyName: string;
   rows: BriefRow[];
-  totals: { reached: number; spend: number; unspent: number; coverageBefore: number | null; coverageAfter: number | null };
+  totals: ResultTotals;
   comparison: { strategy: string; reached: number; spend: number; unspent: number; coverageAfter: number | null }[];
   sensitivity: { label: string; reached: number; unspent: number }[];
-  equity: { flaggedCount: number; budgetPct: number; reachedPct: number };
+  equity: EquityShares;
   assumptions: string[];
 }
 

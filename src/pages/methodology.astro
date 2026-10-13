@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { METHODOLOGY_VERSION, TOOL_VERSION, withBase } from '../config/site';
+import { METHODOLOGY_VERSION, TOOL_VERSION, UPLOAD_TEMPLATE_PATH, withBase } from '../config/site';
 import { STRATEGY_COPY, TERM_COPY } from '../lib/copy';
 import { STATE_MEDIANS } from '../lib/data/load';
 import { formatPct } from '../lib/format';
@@ -33,7 +33,7 @@ import { formatPct } from '../lib/format';
     <ul>
       <li><strong>Kentucky public data (default).</strong> All 120 counties, compiled from the U.S. Census Bureau, CDC PLACES, the USDA Economic Research Service Food Environment Atlas and the Appalachian Regional Commission. See <a href={withBase('/data-sources')}>Data Sources</a>.</li>
       <li><strong>Sample data.</strong> Six fictional communities, always labelled “Sample data”.</li>
-      <li><strong>Your upload.</strong> A CSV in the <a href={withBase('/downloads/nourishscope_upload_template.csv')}>template</a> format. Each row is matched to a Kentucky county by FIPS code, or by county name. Where you fill in a value, it replaces the public value for that field only; every other field keeps the public data.</li>
+      <li><strong>Your upload.</strong> A CSV in the <a href={withBase(UPLOAD_TEMPLATE_PATH)}>template</a> format. Each row is matched to a Kentucky county by FIPS code, or by county name. Where you fill in a value, it replaces the public value for that field only; every other field keeps the public data.</li>
     </ul>
 
     <h2 id="inputs">2. Inputs and defaults</h2>

@@ -12,8 +12,8 @@ export interface ValidationResult {
   warnings: InputIssue[];
 }
 
-const isWholeNonNegative = (v: number) => Number.isFinite(v) && Number.isInteger(v) && v >= 0;
-const isPositive = (v: number) => Number.isFinite(v) && v > 0;
+export const isWholeNonNegative = (v: number) => Number.isInteger(v) && v >= 0;
+export const isPositive = (v: number) => Number.isFinite(v) && v > 0;
 
 /** Spec step 1 for the engine's inputs. Results should not compute while errors remain. */
 export function validateInputs(communities: readonly CommunityInput[], budget: number): ValidationResult {

@@ -5,15 +5,12 @@
  */
 export const TOOL_VERSION = '1.0.0';
 export const METHODOLOGY_VERSION = '1.0';
-export const DATA_VERSION = 'v1.0';
 
 export const SITE_NAME = 'NourishScope';
-export const SITE_ORIGIN = 'https://mosesoluwanifise.github.io';
-export const BASE_PATH = '/nourishscope';
 export const REPO_URL = 'https://github.com/mosesoluwanifise/nourishscope';
 
-export const FOUNDER = 'Yetunde Khadijat Olaogun';
-export const CONTACT_EMAIL = 'Yetunde.Olaogun@uky.edu';
+/** Site path of the upload template; pass through withBase() for links. */
+export const UPLOAD_TEMPLATE_PATH = '/downloads/nourishscope_upload_template.csv';
 
 /**
  * Prefix an internal path with the deploy base path.

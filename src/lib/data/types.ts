@@ -28,8 +28,6 @@ export interface County {
   farmers_markets_snap: number;
 }
 
-export type CountyKey = keyof County;
-
 /** One Data_Dictionary row, as the app sees it. */
 export interface FieldInfo {
   key: string;

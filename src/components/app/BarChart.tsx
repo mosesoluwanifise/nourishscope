@@ -25,10 +25,8 @@ export default function BarChart({ title, bars }: { title: string; bars: Bar[] }
         {bars.map((b, i) => {
           const width = (b.value / max) * 100;
           return (
-            <g key={b.label}>
-              <rect x="0" y={i * rowHeight + 22} width={Math.max(width, 0.5)} height="16"
-                class={b.selected ? 'bar bar--selected' : 'bar'} />
-            </g>
+            <rect key={b.label} x="0" y={i * rowHeight + 22} width={Math.max(width, 0.5)} height="16"
+              class={b.selected ? 'bar bar--selected' : 'bar'} />
           );
         })}
       </svg>

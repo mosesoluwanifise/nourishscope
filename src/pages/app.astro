@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import App from '../components/app/App';
-import { withBase } from '../config/site';
+import { UPLOAD_TEMPLATE_PATH, withBase } from '../config/site';
 ---
 <BaseLayout title="Planning tool" description="Plan where to direct your nutrition program budget across Kentucky communities. Free; your data stays in your browser.">
   <div class="app-intro">
@@ -17,7 +17,7 @@ import { withBase } from '../config/site';
       <p>
         The planning tool needs JavaScript, which is turned off in this browser. You can still read{' '}
         <a href={withBase('/methodology')}>how the calculations work</a>{' '}and download the{' '}
-        <a href={withBase('/downloads/nourishscope_upload_template.csv')}>CSV template</a>.
+        <a href={withBase(UPLOAD_TEMPLATE_PATH)}>CSV template</a>.
       </p>
     </div>
   </noscript>

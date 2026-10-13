@@ -4,6 +4,8 @@
  */
 import {
   equityShares,
+  isPositive,
+  isWholeNonNegative,
   prepareCommunities,
   runStrategy,
   sensitivity,
@@ -22,6 +24,7 @@ import {
   type AssembledCommunity,
   type DataSource,
   type FlaggedRow,
+  type NeedSource,
 } from '../../lib/data/merge';
 import type { ParsedUpload, UploadRow } from '../../lib/data/parse-upload';
 
@@ -69,8 +72,6 @@ export type FieldErrors = {
   served: Record<string, string>;
 };
 
-export type NeedSource = 'snap' | 'user' | 'upload';
-
 export interface Derived {
   communities: AssembledCommunity[];
   needSources: Record<string, NeedSource>;
@@ -87,6 +88,8 @@ export interface Derived {
   sensitivity: SensitivityLevel[] | null;
   equity: EquityShares[] | null;
   costConfirmed: boolean;
+  /** Every community has its own cost from the file, so the global cost is unused. */
+  costFromUploadForAll: boolean;
   needOnly: boolean;
   needDefinition: string;
 }
@@ -97,8 +100,6 @@ export function parseNumberInput(text: string): number | null {
   if (cleaned === '') return null;
   return Number(cleaned);
 }
-
-const isWhole = (v: number) => Number.isInteger(v) && v >= 0;
 
 /** Editing the cost counts as confirming it (plan Key Technical Decisions). */
 export function withCost(state: PlanState, costText: string): PlanState {
@@ -119,9 +120,9 @@ export function derive(state: PlanState, sampleRows: readonly UploadRow[]): Deri
   const warnings: Record<string, string> = {};
 
   const budget = parseNumberInput(state.budgetText);
-  if (budget !== null && !(Number.isFinite(budget) && budget > 0)) errors.budget = 'Enter a budget of more than $0.';
+  if (budget !== null && !isPositive(budget)) errors.budget = 'Enter a budget of more than $0.';
   const cost = parseNumberInput(state.costText);
-  if (cost === null || !(Number.isFinite(cost) && cost > 0)) errors.cost = 'Enter a cost per household of more than $0.';
+  if (cost === null || !isPositive(cost)) errors.cost = 'Enter a cost per household of more than $0.';
   const floorPct = parseNumberInput(state.floorPctText);
   if (floorPct === null || !(Number.isFinite(floorPct) && floorPct >= 0 && floorPct <= 100)) {
     errors.floor = 'Enter a minimum share between 0 and 100%.';
@@ -137,10 +138,10 @@ export function derive(state: PlanState, sampleRows: readonly UploadRow[]): Deri
       const needText = state.needText[c.input.id];
       const servedText = state.servedText[c.input.id];
       const input = { ...c.input };
-      needSources[c.input.id] = 'snap';
+      needSources[c.input.id] = c.needSource;
       if (needText !== undefined && needText.trim() !== '') {
         const need = parseNumberInput(needText);
-        if (need === null || !isWhole(need)) {
+        if (need === null || !isWholeNonNegative(need)) {
           errors.need[c.input.id] = 'Enter a whole number of 0 or more.';
         } else {
           input.need = need;
@@ -149,7 +150,7 @@ export function derive(state: PlanState, sampleRows: readonly UploadRow[]): Deri
       }
       if (servedText !== undefined && servedText.trim() !== '') {
         const served = parseNumberInput(servedText);
-        if (served === null || !isWhole(served)) errors.served[c.input.id] = 'Enter a whole number of 0 or more.';
+        if (served === null || !isWholeNonNegative(served)) errors.served[c.input.id] = 'Enter a whole number of 0 or more.';
         else input.served = served;
       }
       return { ...c, input };
@@ -159,7 +160,7 @@ export function derive(state: PlanState, sampleRows: readonly UploadRow[]): Deri
     const assembled = assembleFromUpload(rows, COUNTIES, globalCost, state.source, state.upload?.countyFixes ?? {});
     communities = assembled.communities;
     flagged = assembled.flagged;
-    for (const c of communities) needSources[c.input.id] = 'upload';
+    for (const c of communities) needSources[c.input.id] = c.needSource;
   }
 
   for (const c of communities) {
@@ -194,6 +195,7 @@ export function derive(state: PlanState, sampleRows: readonly UploadRow[]): Deri
     equity = results.map((r) => equityShares(prepared, r, budget));
   }
 
+  const costFromUploadForAll = communities.length > 0 && communities.every((c) => c.costFromUpload);
   const sources = new Set(Object.values(needSources));
   const needDefinition = sources.size === 0 ? ''
     : sources.size > 1 ? 'Mixed: SNAP households for some communities, your own figures for others (see table)'
@@ -215,7 +217,8 @@ export function derive(state: PlanState, sampleRows: readonly UploadRow[]): Deri
     results,
     sensitivity: sens,
     equity,
-    costConfirmed: state.costConfirmed || (communities.length > 0 && communities.every((c) => c.costFromUpload)),
+    costConfirmed: state.costConfirmed || costFromUploadForAll,
+    costFromUploadForAll,
     needOnly: !(prepared.length > 0 && prepared.every((c) => c.servedKnown)),
     needDefinition,
   };
