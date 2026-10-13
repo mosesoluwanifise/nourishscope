@@ -1,0 +1,2 @@
+community_name,county,fips,number_of_households_in_need,number_of_households_served,cost_per_household,diabetes_pct,obesity_pct,high_bp_pct,low_income_low_access_pct
+Example Community,Adair County,21001,1200,450,110,,,,
