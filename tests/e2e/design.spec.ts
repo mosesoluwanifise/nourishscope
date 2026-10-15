@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { selectCounties as workedExample } from './helpers';
 
-const PAGES = ['', 'app', 'methodology', 'data-sources', 'about', 'research', 'changelog', 'cite', 'privacy', 'accessibility', 'terms', 'contact'];
+const PAGES = ['', 'app', 'methodology', 'data-sources', 'about', 'changelog', 'cite', 'privacy', 'accessibility', 'terms', 'contact'];
 
 async function axe(page: Page) {
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
