@@ -47,7 +47,7 @@ npm run check
 
 Pushing to `main` runs `.github/workflows/deploy.yml`. It tests, builds and deploys to GitHub Pages. In the repository settings, set **Pages → Source** to **GitHub Actions**.
 
-The site is served at the root of its own domain, `nourishscope.app` (set under **Pages → Custom domain**). The domain's DNS must point at GitHub Pages: four `A` records for the bare domain (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`) and a `CNAME` record for `www` pointing to `mosesoluwanifise.github.io`. To serve the site from a sub-path again, change `base` in `astro.config.mjs`.
+The site is served at the root of its own domain, `nourishscope.app` (set under **Pages → Custom domain**). The domain's DNS must point at GitHub Pages: four `A` records for the bare domain (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`) and a `CNAME` record for `www` pointing to `olaogunkhadijat10-wq.github.io`. To serve the site from a sub-path again, change `base` in `astro.config.mjs`.
 
 ## Refresh the data (yearly)
 
