@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { selectCounties } from './helpers';
 
-const PAGES = ['', 'app', 'methodology', 'data-sources', 'about', 'research', 'changelog', 'cite', 'privacy', 'accessibility', 'terms', 'contact'];
+const PAGES = ['', 'app', 'methodology', 'data-sources', 'about', 'changelog', 'cite', 'privacy', 'accessibility', 'terms', 'contact'];
 const ORIGIN = 'http://localhost:4322';
 
 async function axe(page: Page) {

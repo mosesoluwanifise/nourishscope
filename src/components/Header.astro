@@ -5,7 +5,6 @@ const links = [
   { href: '/about', label: 'About' },
   { href: '/methodology', label: 'Methodology' },
   { href: '/data-sources', label: 'Data Sources' },
-  { href: '/research', label: 'Research' },
 ];
 const current = Astro.url.pathname.replace(/\/$/, '');
 const isCurrent = (href: string) => current === withBase(href).replace(/\/$/, '');
