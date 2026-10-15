@@ -7,7 +7,7 @@ export const TOOL_VERSION = '1.0.0';
 export const METHODOLOGY_VERSION = '1.0';
 
 export const SITE_NAME = 'NourishScope';
-export const REPO_URL = 'https://github.com/mosesoluwanifise/nourishscope';
+export const REPO_URL = 'https://github.com/olaogunkhadijat10-wq/nourishscope';
 
 /** Site path of the upload template; pass through withBase() for links. */
 export const UPLOAD_TEMPLATE_PATH = '/downloads/nourishscope_upload_template.csv';
